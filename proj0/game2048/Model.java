@@ -113,9 +113,8 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
-        if(side.equals(Side.NORTH)){
-            for (int j = 0;j<this.board.size();j++){
+        this.board.setViewingPerspective(side);
+        for (int j = 0;j<this.board.size();j++){
                 int merged = 0;
                 for (int i = this.board.size()-2;i>=0;i--){
                     Tile cur = this.board.tile(j, i);
@@ -139,82 +138,7 @@ public class Model extends Observable {
                     }
                 }
             }
-        }else if(side.equals(Side.SOUTH)){
-            for (int j = 0;j<this.board.size();j++){
-                int merged = 0;
-                for (int i = 1;i<this.board.size();i++){
-                    Tile cur = this.board.tile(j, i);
-                    if(cur!=null){
-                        int lowest = i;
-                        for (int k = i-1;k>=0+merged;k--){
-                            if(this.board.tile(j, k)==null){
-                                lowest = k;
-                            }else if(this.board.tile(j, k).value()==cur.value()){
-                                lowest = k;
-                                break;
-                            }
-                        }
-                        if(this.board.move(j, lowest, cur)) {
-                            this.score += this.board.tile(j, lowest).value();
-                            merged++;
-                        }
-                        if(i!=lowest){
-                            changed = true;
-                        }
-                    }
-                }
-            }
-        }else if(side.equals(Side.EAST)){
-            for (int i = 0;i<this.board.size();i++){
-                int merged = 0;
-                for (int j = this.board.size()-2;j>=0;j--){
-                    Tile cur = this.board.tile(j, i);
-                    if(cur!=null){
-                        int highest = j;
-                        for (int k = j+1;k<this.board.size()-merged;k++){
-                            if(this.board.tile(k, i)==null){
-                                highest = k;
-                            }else if(this.board.tile(k, i).value()==cur.value()){
-                                highest = k;
-                                break;
-                            }
-                        }
-                        if(this.board.move(highest, i, cur)) {
-                            this.score += this.board.tile(highest, i).value();
-                            merged++;
-                        }
-                        if(j!=highest){
-                            changed = true;
-                        }
-                    }
-                }
-            }
-        }else if(side.equals(Side.WEST)){
-            for (int i = 0;i<this.board.size();i++){
-                int merged = 0;
-                for (int j = 1;j<this.board.size();j++){
-                    Tile cur = this.board.tile(j, i);
-                    if(cur!=null){
-                        int lowest = j;
-                        for (int k = j-1;k>=0+merged;k--){
-                            if(this.board.tile(k, i)==null){
-                                lowest = k;
-                            }else if(this.board.tile(k, i).value()==cur.value()){
-                                lowest = k;
-                                break;
-                            }
-                        }
-                        if(this.board.move(lowest, i, cur)) {
-                            this.score += this.board.tile(lowest, i).value();
-                            merged++;
-                        }
-                        if(j!=lowest){
-                            changed = true;
-                        }
-                    }
-                }
-            }
-        }
+        this.board.setViewingPerspective(Side.NORTH);
 
         checkGameOver();
         if (changed) {
