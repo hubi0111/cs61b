@@ -1,6 +1,8 @@
 package deque;
 
-public class LinkedListDeque<T> {
+import java.util.Iterator;
+
+public class LinkedListDeque<T> implements Iterable<T> {
 
     private class Node {
         T item;
@@ -14,7 +16,7 @@ public class LinkedListDeque<T> {
         }
     }
 
-    private Node sentinel;
+    public Node sentinel;
     private int size;
 
     public LinkedListDeque() {
@@ -159,20 +161,58 @@ public class LinkedListDeque<T> {
         }
     }
 
-//    public Iterator<T> iterator(){
-//
-//    }
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
+    }
 
-//    public boolean equals(Object o) {
-//        LinkedListDeque toLLD = (LinkedListDeque) o;
-//        Node cur = this.sentinel;
-//        int idx = 0;
-//        while (cur.next != this.sentinel) {
-//            if (cur) ;
-//            idx++;
-//            cur=cur.next;
-//        }
-//        return true;
-//    }
+    /**
+     * Returns if all elements in o are equal to the elements in the current Deque.
+     * @param o LinkedListDeque to compare to
+     * @return
+     */
+    public boolean equals(Object o) {
+        LinkedListDeque toLLD = (LinkedListDeque) o;
+        for(int i = 0;i<size;i++){
+            if(!get(i).equals(((LinkedListDeque<T>) o).get(i))){
+                return false;
+            }
+        }
+        return true;
+    }
 
+    /**
+     * Iterator class.
+     * Retrieved from lecture 11 slides.
+     */
+    private class LinkedListDequeIterator implements Iterator<T> {
+        private int wizPos;
+
+        public LinkedListDequeIterator() {
+            wizPos = 0;
+        }
+
+        public boolean hasNext() {
+            return wizPos < size;
+        }
+
+        public T next() {
+            T returnItem = get(wizPos);
+            wizPos += 1;
+            return returnItem;
+        }
+    }
+    public static void main(String[]args){
+        LinkedListDeque<Integer>LLD = new LinkedListDeque<>();
+        LLD.addFirst(1);
+        LLD.addFirst(2);
+        LLD.addFirst(3);
+        LLD.addFirst(4);
+
+        LinkedListDeque<Integer>LLD2 = new LinkedListDeque<>();
+        LLD2.addFirst(1);
+        LLD2.addFirst(2);
+        LLD2.addFirst(4);
+        LLD2.addFirst(4);
+        System.out.println(LLD.equals(LLD2));
+    }
 }

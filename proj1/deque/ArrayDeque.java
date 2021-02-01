@@ -1,6 +1,9 @@
 package deque;
 
-public class ArrayDeque<T> {
+import java.lang.reflect.Array;
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Iterable<T> {
 
     private T[] deque;
     private int size;
@@ -15,7 +18,7 @@ public class ArrayDeque<T> {
     public ArrayDeque() {
         cap = 8;
         deque = (T[]) new Object[8];
-        first = 0;
+        first = cap - 1;
         last = 0;
         size = 0;
 
@@ -193,4 +196,60 @@ public class ArrayDeque<T> {
         return deque[index];
     }
 
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+
+    /**
+     * Returns if all elements in o are equal to the elements in the current Deque.
+     *
+     * @param o LinkedListDeque to compare to
+     * @return
+     */
+    public boolean equals(Object o) {
+        ArrayDeque toLLD = (ArrayDeque) o;
+        for (int i = 0; i < size; i++) {
+            if (!get(i).equals(((ArrayDeque<T>) o).get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Iterator class.
+     * Retrieved from lecture 11 slides.
+     */
+    private class ArrayDequeIterator implements Iterator<T> {
+        private int wizPos;
+
+        public ArrayDequeIterator() {
+            wizPos = first + 1;
+        }
+
+        public boolean hasNext() {
+            return wizPos < first + size + 1;
+        }
+
+        public T next() {
+            T returnItem = deque[wizPos];
+            wizPos += 1;
+            return returnItem;
+        }
+    }
+
+    public static void main(String[] args) {
+        ArrayDeque<Integer> LLD = new ArrayDeque<>();
+        LLD.addFirst(1);
+        LLD.addFirst(2);
+        LLD.addFirst(3);
+        LLD.addFirst(4);
+
+        ArrayDeque<Integer>LLD2 = new ArrayDeque<>();
+        LLD2.addFirst(1);
+        LLD2.addFirst(2);
+        LLD2.addFirst(3);
+        LLD2.addFirst(4);
+        System.out.println(LLD.equals(LLD2));
+    }
 }
