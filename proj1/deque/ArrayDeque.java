@@ -3,7 +3,7 @@ package deque;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Iterable<T> {
+public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
 
     private T[] deque;
     private int size;
@@ -86,6 +86,7 @@ public class ArrayDeque<T> implements Iterable<T> {
      *
      * @param item item to be added.
      */
+    @Override
     public void addFirst(T item) {
         if (size == cap) {
             resize(size * expandFact);
@@ -100,6 +101,7 @@ public class ArrayDeque<T> implements Iterable<T> {
      *
      * @param item item to be added.
      */
+    @Override
     public void addLast(T item) {
         if (size == cap) {
             resize(size * expandFact);
@@ -109,20 +111,22 @@ public class ArrayDeque<T> implements Iterable<T> {
         size += 1;
     }
 
-    /**
-     * Returns if the Deque is empty.
-     *
-     * @return
-     */
-    public boolean isEmpty() {
-        return size == 0;
-    }
+//    /**
+//     * Returns if the Deque is empty.
+//     *
+//     * @return
+//     */
+//    @Override
+//    public boolean isEmpty() {
+//        return size == 0;
+//    }
 
     /**
      * Returns the size of the Deque.
      *
      * @return
      */
+    @Override
     public int size() {
         return size;
     }
@@ -130,6 +134,7 @@ public class ArrayDeque<T> implements Iterable<T> {
     /**
      * Prints the items in the Deque.
      */
+    @Override
     public void printDeque() {
         int curIndex = plusOne(first);
         while (curIndex != last) {
@@ -144,6 +149,7 @@ public class ArrayDeque<T> implements Iterable<T> {
      *
      * @return
      */
+    @Override
     public T removeFirst() {
         if (isEmpty()) {
             return null;
@@ -164,6 +170,7 @@ public class ArrayDeque<T> implements Iterable<T> {
      *
      * @return
      */
+    @Override
     public T removeLast() {
         if (isEmpty()) {
             return null;
@@ -185,6 +192,7 @@ public class ArrayDeque<T> implements Iterable<T> {
      * @param index index wanted.
      * @return
      */
+    @Override
     public T get(int index) {
         if (index >= size || index < 0) {
             return null;

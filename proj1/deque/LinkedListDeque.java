@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class LinkedListDeque<T> implements Iterable<T> {
+public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
 
     private class Node {
         T item;
@@ -31,6 +31,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
      *
      * @param item item to be added.
      */
+    @Override
     public void addFirst(T item) {
         Node newFirst = new Node(item, sentinel, sentinel.next);
         sentinel.next.prev = newFirst;
@@ -43,6 +44,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
      *
      * @param item item to be added.
      */
+    @Override
     public void addLast(T item) {
         Node oldLast = sentinel.prev;
         Node newLast = new Node(item, oldLast, sentinel);
@@ -51,20 +53,22 @@ public class LinkedListDeque<T> implements Iterable<T> {
         size += 1;
     }
 
-    /**
-     * Returns if the Deque is empty.
-     *
-     * @return
-     */
-    public boolean isEmpty() {
-        return size == 0;
-    }
+//    /**
+//     * Returns if the Deque is empty.
+//     *
+//     * @return
+//     */
+//    @Override
+//    public boolean isEmpty() {
+//        return size == 0;
+//    }
 
     /**
      * Returns the size of the Deque.
      *
      * @return
      */
+    @Override
     public int size() {
         return size;
     }
@@ -72,6 +76,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
     /**
      * Prints the items in the Deque.
      */
+    @Override
     public void printDeque() {
         Node cur = this.sentinel;
         while (cur.next != this.sentinel) {
@@ -86,6 +91,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
      *
      * @return
      */
+    @Override
     public T removeFirst() {
         if (sentinel.next == sentinel) {
             return null;
@@ -103,6 +109,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
      *
      * @return
      */
+    @Override
     public T removeLast() {
         if (sentinel.prev == sentinel) {
             return null;
@@ -121,6 +128,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
      * @param index index wanted.
      * @return
      */
+    @Override
     public T get(int index) {
         Node cur = this.sentinel;
         if (index >= this.size || index < 0) {
