@@ -6,28 +6,75 @@ public class ArrayDeque<T> {
     private int size;
     private int newFirst;
     private int newLast;
-    private final double usageFactor = 0.25;
+    private int cap;
+    private static int expandFact = 2;
+    private static int minCap = 16;
+    private static double minRatio = 0.25;
+    private static int reduceFact = 2;
 
     public ArrayDeque() {
-        this.deque = (T[]) new Object[8];
-        this.size = 0;
-        this.newFirst = 0;
-        this.newLast = 1;
+        cap=8;
+        deque = (T[]) new Object[8];
+        newFirst = cap-1;
+        newLast = 0;
+        size = 0;
     }
 
     /**
-     * Doubles the size of Deque.
+     * Resizes the array to the specified number.
      *
-     * @param curSize current size of Deque.
+     * @param newSize Size to resize to.
      */
-    private void doubleSize(int curSize) {
-        T[] newDeque = (T[]) new Object[curSize * 2];
-        for (int i = 0; i < this.size; i++) {
-            newDeque[i] = this.get(i);
+    private void resize(int newSize) {
+        T[] newItems = (T[]) new Object[newSize];
+
+        int currentFirst = plusOne(newFirst);
+        int currentLast = minusOne(newLast);
+
+        if (currentFirst < currentLast) {
+            int length = currentLast - currentFirst + 1;
+            System.arraycopy(deque, currentFirst, newItems, 0, length);
+            newFirst = newSize - 1;
+            newLast = length;
+        } else {
+            int lengthFirsts = cap  - currentFirst;
+            int newCurrentFirst = newSize - lengthFirsts;
+            int lengthLasts = newLast;
+            System.arraycopy(deque, currentFirst, newItems, newCurrentFirst, lengthFirsts);
+            System.arraycopy(deque, 0, newItems, 0, lengthLasts);
+            newFirst = newSize - lengthFirsts - 1;
         }
-        this.deque = newDeque;
-        this.newFirst = this.deque.length - 1;
-        this.newFirst = this.size;
+
+        cap = newSize;
+        deque = newItems;
+    }
+
+    /**
+     * Inceases the index by 1 if index is not the Deque's size.
+     *
+     * @param index index to increase.
+     * @return
+     */
+    private int plusOne(int index) {
+        if (index == cap - 1) {
+            return 0;
+        } else {
+            return index + 1;
+        }
+    }
+
+    /**
+     * Reduces the index by 1 if index is not 0.
+     *
+     * @param index index to reduce.
+     * @return
+     */
+    private int minusOne(int index) {
+        if (index == 0) {
+            return cap - 1;
+        } else {
+            return index - 1;
+        }
     }
 
     /**
@@ -36,12 +83,12 @@ public class ArrayDeque<T> {
      * @param item item to be added.
      */
     public void addFirst(T item) {
-        if (this.size == this.deque.length) {
-            this.doubleSize(this.size);
+        if (size == cap) {
+            resize(size * expandFact);
         }
-        this.deque[this.newFirst] = item;
-        this.newFirst -= 1;
-        this.size += 1;
+        deque[newFirst] = item;
+        newFirst = minusOne(newFirst);
+        size += 1;
     }
 
     /**
@@ -50,12 +97,12 @@ public class ArrayDeque<T> {
      * @param item item to be added.
      */
     public void addLast(T item) {
-        if (this.size == this.deque.length) {
-            this.doubleSize(this.size);
+        if (size == cap) {
+            resize(size * expandFact);
         }
-        this.deque[this.newLast] = item;
-        this.newLast += 1;
-        this.size += 1;
+        deque[newLast] = item;
+        newLast = plusOne(newLast);
+        size += 1;
     }
 
     /**
@@ -64,7 +111,7 @@ public class ArrayDeque<T> {
      * @return
      */
     public boolean isEmpty() {
-        return this.size == 0;
+        return size == 0;
     }
 
     /**
@@ -73,42 +120,19 @@ public class ArrayDeque<T> {
      * @return
      */
     public int size() {
-        return this.size;
+        return size;
     }
 
     /**
      * Prints the items in the Deque.
      */
     public void printDeque() {
-        for (int i = 0; i < this.size; i++) {
-            System.out.print(this.get(i) + " ");
+        int curIndex = plusOne(newFirst);
+        while (curIndex != newLast) {
+            System.out.print(deque[curIndex] + " ");
+            curIndex = plusOne(curIndex);
         }
         System.out.println();
-    }
-
-    /**
-     * Halves the size of Deque
-     *
-     * @param size current size of Deque.
-     */
-    private void halfSize(int size) {
-        T[] newDeque = (T[]) new Object[size / 2];
-        for (int i = 0; i < this.size; i++) {
-            newDeque[i] = this.get(i);
-        }
-        this.deque = newDeque;
-        this.newFirst = this.deque.length - 1;
-        this.newLast = this.size;
-    }
-
-    /**
-     * Checks and reduces the Deque size.
-     */
-    private void reduce() {
-        double usageRatio = (double) this.size / this.deque.length;
-        if (usageRatio < usageFactor && this.deque.length > 16) {
-            this.halfSize(this.deque.length);
-        }
     }
 
     /**
@@ -117,15 +141,17 @@ public class ArrayDeque<T> {
      * @return
      */
     public T removeFirst() {
-        if (this.size == 0) {
+        if (isEmpty()) {
             return null;
         }
-        int nextIndex = this.newFirst + 1;
-        T firstItem = this.deque[nextIndex];
-        this.deque[nextIndex] = null;
-        this.newFirst = nextIndex;
-        this.size -= 1;
-        this.reduce();
+        int nextIndex = plusOne(newFirst);
+        T firstItem = deque[nextIndex];
+        deque[nextIndex] = null;
+        newFirst = nextIndex;
+        size -= 1;
+        if (deque.length >= minCap && (double) size / deque.length < minRatio) {
+            resize(deque.length / reduceFact);
+        }
         return firstItem;
     }
 
@@ -135,15 +161,17 @@ public class ArrayDeque<T> {
      * @return
      */
     public T removeLast() {
-        if (this.size == 0) {
+        if (isEmpty()) {
             return null;
         }
-        int prevIndex = this.newLast - 1;
-        T lastItem = this.deque[prevIndex];
-        this.deque[prevIndex] = null;
-        this.newLast = prevIndex;
-        this.size -= 1;
-        this.reduce();
+        int prevIndex = minusOne(newLast);
+        T lastItem = deque[prevIndex];
+        deque[prevIndex] = null;
+        newLast = prevIndex;
+        size -= 1;
+        if (deque.length >= minCap && (double) size / deque.length < minRatio) {
+            resize(deque.length / reduceFact);
+        }
         return lastItem;
     }
 
@@ -154,10 +182,30 @@ public class ArrayDeque<T> {
      * @return
      */
     public T get(int index) {
-        if (index >= this.size || index < 0) {
+        if (index >= size || index < 0) {
             return null;
         }
-        return this.deque[index];
+        index=index+newFirst+1;
+        if (index >= cap) {
+            index -= cap;
+        }
+        return deque[index];
+    }
+
+    public static void main(String[] args) {
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        ad.printDeque();
+        ad.addFirst(1);
+        ad.printDeque();
+        ad.addFirst(2);
+        ad.printDeque();
+        ad.addLast(3);
+        ad.printDeque();
+        System.out.println(ad.get(0));
+        System.out.println(ad.get(1));
+        System.out.println(ad.get(2));
+        ad.removeFirst();
+        ad.printDeque();
     }
 
 }
