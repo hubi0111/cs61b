@@ -13,9 +13,9 @@ public class ArrayDeque<T> {
     private static int reduceFact = 2;
 
     public ArrayDeque() {
-        cap=8;
+        cap = 8;
         deque = (T[]) new Object[8];
-        newFirst = cap-1;
+        newFirst = cap - 1;
         newLast = 0;
         size = 0;
     }
@@ -37,7 +37,7 @@ public class ArrayDeque<T> {
             newFirst = newSize - 1;
             newLast = length;
         } else {
-            int lengthFirsts = cap  - currentFirst;
+            int lengthFirsts = cap - currentFirst;
             int newCurrentFirst = newSize - lengthFirsts;
             int lengthLasts = newLast;
             System.arraycopy(deque, currentFirst, newItems, newCurrentFirst, lengthFirsts);
@@ -185,27 +185,10 @@ public class ArrayDeque<T> {
         if (index >= size || index < 0) {
             return null;
         }
-        index=index+newFirst+1;
+        index = index + newFirst + 1;
         if (index >= cap) {
             index -= cap;
         }
         return deque[index];
     }
-
-    public static void main(String[] args) {
-        ArrayDeque<Integer> ad = new ArrayDeque<>();
-        ad.printDeque();
-        ad.addFirst(1);
-        ad.printDeque();
-        ad.addFirst(2);
-        ad.printDeque();
-        ad.addLast(3);
-        ad.printDeque();
-        System.out.println(ad.get(0));
-        System.out.println(ad.get(1));
-        System.out.println(ad.get(2));
-        ad.removeFirst();
-        ad.printDeque();
-    }
-
 }
