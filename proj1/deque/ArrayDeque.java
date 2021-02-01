@@ -111,15 +111,15 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
         size += 1;
     }
 
-//    /**
-//     * Returns if the Deque is empty.
-//     *
-//     * @return
-//     */
-//    @Override
-//    public boolean isEmpty() {
-//        return size == 0;
-//    }
+    /**
+     * Returns if the Deque is empty.
+     *
+     * @return
+     */
+    @Override
+    public boolean isEmpty() {
+        return size == 0;
+    }
 
     /**
      * Returns the size of the Deque.
@@ -215,9 +215,15 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
      * @return
      */
     public boolean equals(Object o) {
-        ArrayDeque toLLD = (ArrayDeque) o;
+        if (o == null) {
+            return false;
+        }
+        Deque toLLD = (Deque) o;
+        if (size != ((Deque<T>) o).size()) {
+            return false;
+        }
         for (int i = 0; i < size; i++) {
-            if (!get(i).equals(((ArrayDeque<T>) o).get(i))) {
+            if (!get(i).equals(((Deque<T>) o).get(i))) {
                 return false;
             }
         }
@@ -232,32 +238,19 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
         private int wizPos;
 
         public ArrayDequeIterator() {
-            wizPos = first + 1;
+            wizPos = 0;
         }
 
         public boolean hasNext() {
-            return wizPos < first + size + 1;
+            return wizPos < size;
         }
 
         public T next() {
-            T returnItem = deque[wizPos];
+
+            T returnItem = get(wizPos);
             wizPos += 1;
             return returnItem;
         }
     }
 
-    public static void main(String[] args) {
-        ArrayDeque<Integer> LLD = new ArrayDeque<>();
-        LLD.addFirst(1);
-        LLD.addFirst(2);
-        LLD.addFirst(3);
-        LLD.addFirst(4);
-
-        ArrayDeque<Integer>LLD2 = new ArrayDeque<>();
-        LLD2.addFirst(1);
-        LLD2.addFirst(2);
-        LLD2.addFirst(3);
-        LLD2.addFirst(4);
-        System.out.println(LLD.equals(LLD2));
-    }
 }

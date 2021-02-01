@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class MaxArrayDeque<T> extends ArrayDeque{
+public class MaxArrayDeque<T> extends ArrayDeque {
 
     private Comparator<T> comp;
 
@@ -38,13 +38,5 @@ public class MaxArrayDeque<T> extends ArrayDeque{
         List<T> deque = getDeque();
         return Collections.max(deque, c);
     }
-//
-//    public static void main(String[]args){
-//        MaxArrayDeque<Integer> LLD = new MaxArrayDeque<>();
-//        LLD.addFirst(1);
-//        LLD.addFirst(2);
-//        LLD.addFirst(3);
-//        LLD.addFirst(4);
-//    }
 
 }

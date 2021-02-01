@@ -16,7 +16,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
         }
     }
 
-    public Node sentinel;
+    private Node sentinel;
     private int size;
 
     public LinkedListDeque() {
@@ -53,15 +53,15 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
         size += 1;
     }
 
-//    /**
-//     * Returns if the Deque is empty.
-//     *
-//     * @return
-//     */
-//    @Override
-//    public boolean isEmpty() {
-//        return size == 0;
-//    }
+    /**
+     * Returns if the Deque is empty.
+     *
+     * @return
+     */
+    @Override
+    public boolean isEmpty() {
+        return size == 0;
+    }
 
     /**
      * Returns the size of the Deque.
@@ -161,11 +161,11 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
      * @param index index curently at.
      * @return
      */
-    public T getRecursiveHelper(Node cur, int index) {
+    private T getRecursiveHelper(Node cur, int index) {
         if (index == 0) {
             return cur.next.item;
         } else {
-            return getRecursive(index - 1);
+            return getRecursiveHelper(cur.next, index - 1);
         }
     }
 
@@ -175,13 +175,20 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
 
     /**
      * Returns if all elements in o are equal to the elements in the current Deque.
+     *
      * @param o LinkedListDeque to compare to
      * @return
      */
     public boolean equals(Object o) {
-        LinkedListDeque toLLD = (LinkedListDeque) o;
-        for(int i = 0;i<size;i++){
-            if(!get(i).equals(((LinkedListDeque<T>) o).get(i))){
+        if (o == null) {
+            return false;
+        }
+        Deque toLLD = (Deque) o;
+        if (size != ((Deque<T>) o).size()) {
+            return false;
+        }
+        for (int i = 0; i < size; i++) {
+            if (!get(i).equals(((Deque<T>) o).get(i))) {
                 return false;
             }
         }
@@ -209,18 +216,5 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
             return returnItem;
         }
     }
-    public static void main(String[]args){
-        LinkedListDeque<Integer>LLD = new LinkedListDeque<>();
-        LLD.addFirst(1);
-        LLD.addFirst(2);
-        LLD.addFirst(3);
-        LLD.addFirst(4);
 
-        LinkedListDeque<Integer>LLD2 = new LinkedListDeque<>();
-        LLD2.addFirst(1);
-        LLD2.addFirst(2);
-        LLD2.addFirst(4);
-        LLD2.addFirst(4);
-        System.out.println(LLD.equals(LLD2));
-    }
 }
