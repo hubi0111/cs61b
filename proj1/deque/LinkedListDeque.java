@@ -54,16 +54,6 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     }
 
     /**
-     * Returns if the Deque is empty.
-     *
-     * @return
-     */
-    @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    /**
      * Returns the size of the Deque.
      *
      * @return
@@ -180,7 +170,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
      * @return
      */
     public boolean equals(Object o) {
-        if (o == null) {
+        if (o == null || !(o instanceof Deque)) {
             return false;
         }
         Deque toLLD = (Deque) o;
@@ -202,7 +192,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     private class LinkedListDequeIterator implements Iterator<T> {
         private int wizPos;
 
-        public LinkedListDequeIterator() {
+        LinkedListDequeIterator() {
             wizPos = 0;
         }
 

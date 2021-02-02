@@ -1,6 +1,5 @@
 package deque;
 
-import java.lang.reflect.Array;
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
@@ -112,16 +111,6 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
     }
 
     /**
-     * Returns if the Deque is empty.
-     *
-     * @return
-     */
-    @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    /**
      * Returns the size of the Deque.
      *
      * @return
@@ -215,7 +204,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
      * @return
      */
     public boolean equals(Object o) {
-        if (o == null) {
+        if (o == null || !(o instanceof Deque)) {
             return false;
         }
         Deque toLLD = (Deque) o;
@@ -237,7 +226,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
     private class ArrayDequeIterator implements Iterator<T> {
         private int wizPos;
 
-        public ArrayDequeIterator() {
+        ArrayDequeIterator() {
             wizPos = 0;
         }
 

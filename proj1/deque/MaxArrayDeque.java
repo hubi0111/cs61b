@@ -39,4 +39,10 @@ public class MaxArrayDeque<T> extends ArrayDeque {
         return Collections.max(deque, c);
     }
 
+    public static void main(String[]args){
+//
+//        MaxArrayDeque<Integer> MAD = new MaxArrayDeque<>();
+
+    }
+
 }
