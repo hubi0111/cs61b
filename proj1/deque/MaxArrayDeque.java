@@ -2,16 +2,16 @@ package deque;
 
 import java.util.Comparator;
 
-public class MaxArrayDeque<T> extends ArrayDeque {
+public class MaxArrayDeque<T> extends ArrayDeque<T> {
 
     /**
      * Default Comparator for Deque.
      */
     private Comparator<T> comp;
 
-    public MaxArrayDeque(Comparator<T> c) {
+    public MaxArrayDeque(/*Comparator<T> c*/) {
         super();
-        comp = c;
+        //comp = c;
     }
 
     /**
@@ -65,6 +65,19 @@ public class MaxArrayDeque<T> extends ArrayDeque {
             }
         }
         return deque[maxDex];
+    }
+
+    public static void main(String [] args){
+        MaxArrayDeque<Integer> MAD = new MaxArrayDeque<>();
+        MAD.addFirst(4);
+        MAD.addFirst(3);
+        MAD.addFirst(2);
+        MAD.addFirst(1);
+        MAD.removeFirst();
+
+        System.out.println(MAD.get(0));
+
+        MAD.printDeque();
     }
 
 }
