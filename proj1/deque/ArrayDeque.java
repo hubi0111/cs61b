@@ -125,7 +125,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
      */
     @Override
     public void printDeque() {
-        for(int i = plusOne(first);i<plusOne(first)+size;i++){
+        for (int i = plusOne(first); i < plusOne(first) + size; i++) {
             System.out.print(deque[i] + " ");
         }
         System.out.println();
