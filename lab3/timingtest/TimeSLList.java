@@ -34,7 +34,7 @@ public class TimeSLList {
         Ns.addLast(128000);
 
         AList<Integer> tens = new AList<>();
-        for(int j = 0;j<10000;j++){
+        for(int j = 0;j<8;j++){
             tens.addLast(10000);
         }
 
