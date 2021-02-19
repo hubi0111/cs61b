@@ -8,15 +8,15 @@ A:
 
 Q: What's something you felt proud of in your code, if anything?
 
-A:
+A: I'm happy with the fact that I was able to figure out everything by myself without having to go to office hours while keeping most things concise.
 
 Q: What's something that was particularly inelegant in your code, if anything?
 
-A:
+A: The resize method in my ArrayDeque was probably a little over complicated so it's a little hard to read.
 
 Q: What did you learn by talking to your partner about writing ArrayDeque?
 
-A:
+A: I learned that while I may have thought that my solution was the best possible choice, that there are actually many possible solutions and that some are actually more efficient.
 
 Q: What do you wish you would have known before writing ArrayDeque, if anything?
 
@@ -24,7 +24,7 @@ A:
 
 Q: If you wrote ArrayDeque again, what would you do differently, if anything?
 
-A:
+A: I would probably take a very similar approach to my first time, but I would read the specs at the bottom of the project from the beginning. When I first did ArrayDeque, I ran into a few issues that made my code problematic. These problems were then solved after reading the spec.
 
 -----
 
