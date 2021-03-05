@@ -1,0 +1,24 @@
+InsertInOrderSpeedTest
+
+num string | ULLMap | BSTMap | TreeMap | Hashmap
+1 | 0 | 0 | 0 | 0
+10 | 0 | 0 | 0 | 0
+100 | 0 | 0 | 0 | 0
+1000 | 0.1 | 0.1 | 0 | 0
+10000 | 0.74 | 0.69 | 0.01 | 0.01
+
+InsertRandomSpeedTest (len = 10)
+num string | ULLMap | BSTMap | TreeMap | Hashmap
+1 | 0 | 0 | 0 | 0
+10 | 0 | 0 | 0 | 0
+100 | 0 | 0 | 0 | 0
+1000 | 0.1 | 0.1 | 0 | 0
+10000 | 0.27 | 0.01 | 0.01 | 0.00
+
+InsertRandomSpeedTest (len = 100)
+num string | ULLMap | BSTMap | TreeMap | Hashmap
+1 | 0 | 0 | 0 | 0
+10 | 0 | 0 | 0 | 0
+100 | 0 | 0 | 0 | 0
+1000 | 0.1 | 0 | 0 | 0
+10000 | 0.42 | 0.01 | 0.02 | 0.02
