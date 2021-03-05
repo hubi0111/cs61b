@@ -3,6 +3,9 @@
 **Name**:
 
 ## Classes and Data Structures
+Main: used to call all gitlet functions
+Repositry: represents a gitlet repository
+
 
 ### Class 1
 
