@@ -1,23 +1,17 @@
 package gitlet;
 
-// TODO: any imports you need here
-
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Date; // TODO: You'll likely use this in this class
+import java.util.Date;
 import java.util.HashMap;
 
 /**
  * Represents a gitlet commit object.
- * TODO: It's a good idea to give a description here of what else this Class
- * does at a high level.
  *
  * @author Bill Hu
  */
 public class Commit implements Serializable {
     /**
-     * TODO: add instance variables here.
-     *
      * List all instance variables of the Commit class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided one example for `message`.
@@ -41,12 +35,12 @@ public class Commit implements Serializable {
     /**
      * The merge parent of this Commit.
      */
-    private String merge_parent;
+    private String mergeParent;
 
     /**
      * The files this Commit tracks.
      */
-    private HashMap<String, String> tracked_files;
+    private HashMap<String, String> trackedFiles;
 
     /**
      * The id of this Commit.
@@ -56,7 +50,7 @@ public class Commit implements Serializable {
     Commit(String message, String parent) {
         this.message = message;
         this.parent = parent;
-        this.tracked_files = new HashMap<>();
+        this.trackedFiles = new HashMap<>();
         setTime();
     }
 
@@ -81,7 +75,7 @@ public class Commit implements Serializable {
         this.time = d.format(date) + " -0800";
     }
 
-    public void setTime(String time){
+    public void setTime(String time) {
         this.time = time;
     }
 
@@ -93,20 +87,20 @@ public class Commit implements Serializable {
         this.parent = parent;
     }
 
-    public String getMerge_parent() {
-        return merge_parent;
+    public String getMergeParent() {
+        return mergeParent;
     }
 
-    public void setMerge_parent(String merge_parent) {
-        this.merge_parent = merge_parent;
+    public void setMergeParent(String mergeParent) {
+        this.mergeParent = mergeParent;
     }
 
-    public HashMap<String, String> getTracked_files() {
-        return tracked_files;
+    public HashMap<String, String> getTrackedFiles() {
+        return trackedFiles;
     }
 
-    public void setTracked_files(HashMap<String, String> tracked_files) {
-        this.tracked_files = tracked_files;
+    public void setTrackedFiles(HashMap<String, String> trackedFiles) {
+        this.trackedFiles = trackedFiles;
     }
 
     public String getId() {
@@ -117,5 +111,4 @@ public class Commit implements Serializable {
         this.id = id;
     }
 
-    /* TODO: fill in the rest of this class. */
 }

@@ -15,7 +15,8 @@ public class Main {
         if (args.length == 0) {
             System.out.println("Please enter a command.");
             System.exit(0);
-        } else if (!Utils.join(System.getProperty("user.dir"), ".gitlet").exists() && !args[0].equals("init")) {
+        } else if (!Utils.join(System.getProperty("user.dir"),
+                ".gitlet").exists() && !args[0].equals("init")) {
             System.out.println("Not in an initialized Gitlet directory.");
             System.exit(0);
         }

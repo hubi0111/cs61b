@@ -8,19 +8,13 @@ import java.util.Set;
 
 import static gitlet.Utils.*;
 
-// TODO: any imports you need here
-
 /**
  * Represents a gitlet repository.
- * TODO: It's a good idea to give a description here of what else this Class
- * does at a high level.
  *
  * @author Bill Hu
  */
 public class Repository {
     /**
-     * TODO: add instance variables here.
-     *
      * List all instance variables of the Repository class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided two examples for you.
@@ -71,7 +65,8 @@ public class Repository {
             System.out.println("Incorrect operands.");
             System.exit(0);
         } else if (GITLET_DIR.exists()) {
-            System.out.println("A gitlet version control system already exists in the current directory.");
+            System.out.println("A gitlet version control "
+                    + "system already exists in the current directory.");
             System.exit(0);
         } else {
             GITLET_DIR.mkdir();
@@ -80,12 +75,12 @@ public class Repository {
             COMMITS.mkdir();
             REMOVED.mkdir();
             STAGED.mkdir();
-            Commit initial_commit = new Commit("initial commit", null);
-            initial_commit.setTime("Thu Jan 1 00:00:00 1970 -0800");
-            saveCommit(initial_commit);
+            Commit intialCommit = new Commit("initial commit", null);
+            intialCommit.setTime("Thu Jan 1 00:00:00 1970 -0800");
+            saveCommit(intialCommit);
             File master = new File(BRANCHES, "master");
-            String commit_id = initial_commit.getId();
-            writeContents(master, commit_id);
+            String commitId = intialCommit.getId();
+            writeContents(master, commitId);
             writeContents(HEAD, "master");
         }
 
@@ -96,17 +91,17 @@ public class Repository {
             System.out.println("Incorrect operands.");
             System.exit(0);
         }
-        String file_name = args[1];
-        File file = new File(file_name);
+        String fileName = args[1];
+        File file = new File(fileName);
         if (!file.exists()) {
             System.out.println("File does not exist.");
             System.exit(0);
         } else {
-            File staged = new File(STAGED, file_name);
-            HashMap<String, String> cur_tracked = getHEAD().getTracked_files();
+            File staged = new File(STAGED, fileName);
+            HashMap<String, String> curTracked = getHEAD().getTrackedFiles();
             String id = sha1(readContentsAsString(file));
-            if (cur_tracked.keySet().contains(file_name) && cur_tracked.get(file_name).equals(id)) {
-                File removed = new File(REMOVED, file_name);
+            if (curTracked.keySet().contains(fileName) && curTracked.get(fileName).equals(id)) {
+                File removed = new File(REMOVED, fileName);
                 staged.delete();
                 removed.delete();
             } else {
@@ -116,10 +111,6 @@ public class Repository {
         }
     }
 
-    /**
-     * @param args
-     * @source https://www.programiz.com/java-programming/examples/convert-array-set convert array to Set
-     */
     public void commit(String[] args) {
         if (args.length != 2) {
             System.out.println("Incorrect operands.");
@@ -136,21 +127,21 @@ public class Repository {
                 System.exit(0);
             } else {
                 Commit head = getHEAD();
-                HashMap<String, String> cur_tracked = head.getTracked_files();
-                for (String name : cur_tracked.keySet()) {
+                HashMap<String, String> curTracked = head.getTrackedFiles();
+                for (String name : curTracked.keySet()) {
                     if (staged.contains(name) || removed.contains(name)) {
-                        cur_tracked.remove(name);
+                        curTracked.remove(name);
                     }
                 }
                 for (String name : staged) {
                     File file = new File(STAGED, name);
                     String id = sha1(readContents(file));
-                    cur_tracked.put(name, id);
+                    curTracked.put(name, id);
                     File blob = new File(BLOBS, id);
                     writeContents(blob, readContentsAsString(file));
                 }
                 Commit commit = new Commit(message, head.getId());
-                commit.setTracked_files(cur_tracked);
+                commit.setTrackedFiles(curTracked);
                 saveCommit(commit);
                 String branch = readContentsAsString(HEAD);
                 File b = new File(BRANCHES, branch);
@@ -173,7 +164,7 @@ public class Repository {
             String name = args[1];
             File file = new File(name);
             File staged = new File(STAGED, name);
-            Set<String> tracked = getHEAD().getTracked_files().keySet();
+            Set<String> tracked = getHEAD().getTrackedFiles().keySet();
             if (tracked.contains(name)) {
                 File remove = new File(REMOVED, name);
                 remove.mkdir();
@@ -207,7 +198,7 @@ public class Repository {
     }
 
     public void find(String[] args) {
-        if (args.length != 1) {
+        if (args.length != 2) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         } else {
@@ -233,12 +224,12 @@ public class Repository {
             String[] branches = BRANCHES.list();
             String[] staged = STAGED.list();
             String[] removed = REMOVED.list();
-            String[] modifications = null;//TODO
-            String[] untracked = null;//TODO
-            String cur_branch = readContentsAsString(HEAD);
+            String[] modifications = null; //TODO
+            String[] untracked = null; //TODO
+            String curBranch = readContentsAsString(HEAD);
             System.out.println("=== Branches ===");
             for (String b : branches) {
-                if (b.equals(cur_branch)) {
+                if (b.equals(curBranch)) {
                     System.out.print("*");
                 }
                 System.out.println(b);
@@ -252,31 +243,29 @@ public class Repository {
                 System.out.println(r);
             }
             System.out.println("=== Modifications Not Staged For Commit ===");
-            for (String m : modifications) {
-                System.out.println(m);
-            }
+//            for (String m : modifications) {
+//                System.out.println(m);
+//            }
             System.out.println("=== Untracked Files ===");
-            for (String u : untracked) {
-                System.out.println(u);
-            }
+//            for (String u : untracked) {
+//                System.out.println(u);
+//            }
         }
     }
 
     public void checkout(String[] args) {
         if (args.length == 3 && args[1].equals("--")) {
-            String cur_branch = readContentsAsString(HEAD);
-            File file = new File(BRANCHES, cur_branch);
+            String curBranch = readContentsAsString(HEAD);
+            File file = new File(BRANCHES, curBranch);
             String head = readContentsAsString(file);
             checkoutFile(args[2], head);
         } else if (args.length == 4 && args[2].equals("--")) {
             String id = args[1];
             String file = args[3];
-            if (id.length() == 40) {
-                checkoutFile(file, id);
-            } else {
-                String hashId = sha1(id);
-                checkoutFile(file, hashId);
+            if (id.length() != 40) {
+                id = sha1(id);
             }
+            checkoutFile(file, id);
         } else if (args.length == 2) {
             String branch = args[1];
             File file = new File(BRANCHES, branch);
@@ -305,7 +294,9 @@ public class Repository {
             if (newBranch.exists()) {
                 System.out.println("A branch with that name already exists.");
             } else {
-                writeContents(newBranch, getHEAD());
+                String head = readContentsAsString(HEAD);
+                File file = new File(BRANCHES, head);
+                writeContents(newBranch, readContentsAsString(file));
             }
         }
     }
@@ -337,7 +328,10 @@ public class Repository {
             if (!file.exists()) {
                 System.out.println("No commit with that id exists.");
             } else {
-                Set<String> tracked = getCommit(id).getTracked_files().keySet();
+                if (id.length() != 40) {
+                    id = sha1(id);
+                }
+                Set<String> tracked = getCommit(id).getTrackedFiles().keySet();
                 for (String s : tracked) {
                     checkoutFile(s, id);
                 }
@@ -350,7 +344,7 @@ public class Repository {
             System.out.println("Incorrect operands.");
             System.exit(0);
         } else {
-
+            //do merge
         }
     }
 
@@ -360,7 +354,7 @@ public class Repository {
             System.out.println("No commit with that id exists.");
         } else {
             Commit commit = getCommit(id);
-            HashMap<String, String> tracked = commit.getTracked_files();
+            HashMap<String, String> tracked = commit.getTrackedFiles();
             if (tracked.keySet().contains(name)) {
                 String blob = tracked.get(name);
                 File f = new File(name);
@@ -374,12 +368,14 @@ public class Repository {
 
     private void checkoutBranch(String id) {
         Commit commit = getHEAD();
-        Set<String> tracked = commit.getTracked_files().keySet();
+        Set<String> tracked = commit.getTrackedFiles().keySet();
         Commit commit2 = getCommit(id);
-        Set<String> tracked2 = commit2.getTracked_files().keySet();
+        Set<String> tracked2 = commit2.getTrackedFiles().keySet();
         for (String name : new File(".").list()) {
-            if ((!tracked.contains(name) && tracked2.contains(name)) || (tracked.contains(name) && !tracked2.contains(name) && new File(REMOVED, name).exists())) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+            if ((!tracked.contains(name) && tracked2.contains(name)) || (tracked.contains(name)
+                    && !tracked2.contains(name) && new File(REMOVED, name).exists())) {
+                System.out.println("There is an untracked file in the way"
+                        + "; delete it, or add and commit it first.");
                 return;
             }
         }
@@ -415,10 +411,10 @@ public class Repository {
         }
         System.out.println("===");
         System.out.println("commit " + commit.getId());
-        if (commit.getMerge_parent() != null) {
+        if (commit.getMergeParent() != null) {
             String parent = commit.getParent();
-            String merge_parent = commit.getMerge_parent();
-            System.out.println("Merged " + merge_parent + " into " + parent);
+            String mergeParent = commit.getMergeParent();
+            System.out.println("Merged " + mergeParent + " into " + parent);
         }
         System.out.println("Date: " + commit.getTime());
         System.out.println(commit.getMessage());
@@ -426,8 +422,8 @@ public class Repository {
     }
 
     private Commit getHEAD() {
-        String cur_branch = readContentsAsString(HEAD);
-        File f = new File(BRANCHES, cur_branch);
+        String curBranch = readContentsAsString(HEAD);
+        File f = new File(BRANCHES, curBranch);
         return getCommit(readContentsAsString(f));
     }
 
