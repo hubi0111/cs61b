@@ -31,11 +31,35 @@ public class Main {
             case "commit":
                 repo.commit(args);
                 break;
+            case "rm":
+                repo.rm(args);
+                break;
             case "log":
                 repo.log(args);
                 break;
+            case "global-log":
+                repo.globalLog(args);
+                break;
+            case "find":
+                repo.find(args);
+                break;
+            case "status":
+                repo.status(args);
+                break;
             case "checkout":
                 repo.checkout(args);
+                break;
+            case "branch:
+                repo.branch(args);
+                break;
+            case "rm-branch":
+                repo.rmBranch(args);
+                break;
+            case "reset":
+                repo.reset(args);
+                break;
+            case "merge":
+                repo.merge(args);
                 break;
             default:
                 System.out.println("No command with that name exists.");

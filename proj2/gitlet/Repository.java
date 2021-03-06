@@ -165,12 +165,100 @@ public class Repository {
         }
     }
 
+    public void rm(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+            String name = args[1];
+            File file = new File(name);
+            File staged = new File(STAGED, name);
+            Set<String> tracked = getHEAD().getTracked_files().keySet();
+            if (tracked.contains(name)) {
+                File remove = new File(REMOVED, name);
+                remove.mkdir();
+                restrictedDelete(file);
+            }
+            if (!staged.delete() && !tracked.contains(name)) {
+                System.out.println("No reason to remove the file.");
+            }
+        }
+    }
+
     public void log(String[] args) {
         if (args.length != 1) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         } else {
             printNextLog(getHEAD());
+        }
+    }
+
+    public void globalLog(String[] args) {
+        if (args.length != 1) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+            for (File commit : COMMITS.listFiles()) {
+                Commit c = readObject(commit, Commit.class);
+                printLog(c);
+            }
+        }
+    }
+
+    public void find(String[] args) {
+        if (args.length != 1) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+            boolean found = false;
+            for (File commit : COMMITS.listFiles()) {
+                Commit c = readObject(commit, Commit.class);
+                if (c.getMessage().equals(args[1])) {
+                    System.out.println(c.getId());
+                    found = true;
+                }
+            }
+            if (!found) {
+                System.out.println("Found no commit with that message.");
+            }
+        }
+    }
+
+    public void status(String[] args) {
+        if (args.length != 1) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+            String[] branches = BRANCHES.list();
+            String[] staged = STAGED.list();
+            String[] removed = REMOVED.list();
+            String[] modifications = null;//TODO
+            String[] untracked = null;//TODO
+            String cur_branch = readContentsAsString(HEAD);
+            System.out.println("=== Branches ===");
+            for (String b : branches) {
+                if (b.equals(cur_branch)) {
+                    System.out.print("*");
+                }
+                System.out.println(b);
+            }
+            System.out.println("=== Staged Files ===");
+            for (String s : staged) {
+                System.out.println(s);
+            }
+            System.out.println("=== Removed Files ===");
+            for (String r : removed) {
+                System.out.println(r);
+            }
+            System.out.println("=== Modifications Not Staged For Commit ===");
+            for (String m : modifications) {
+                System.out.println(m);
+            }
+            System.out.println("=== Untracked Files ===");
+            for (String u : untracked) {
+                System.out.println(u);
+            }
         }
     }
 
@@ -204,6 +292,65 @@ public class Repository {
             }
         } else {
             System.out.println("Incorrect operands.");
+        }
+    }
+
+    public void branch(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+            String branch = args[1];
+            File newBranch = new File(BRANCHES, branch);
+            if (newBranch.exists()) {
+                System.out.println("A branch with that name already exists.");
+            } else {
+                writeContents(newBranch, getHEAD());
+            }
+        }
+    }
+
+    public void rmBranch(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+            String branch = args[1];
+            File remove = new File(BRANCHES, branch);
+            if (!remove.exists()) {
+                System.out.println("A branch with that name does not exist.");
+            } else if (remove.equals(readContentsAsString(HEAD))) {
+                System.out.println("Cannot remove the current branch.");
+            } else {
+                remove.delete();
+            }
+        }
+    }
+
+    public void reset(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+            String id = args[1];
+            File file = new File(COMMITS, id);
+            if (!file.exists()) {
+                System.out.println("No commit with that id exists.");
+            } else {
+                Set<String> tracked = getCommit(id).getTracked_files().keySet();
+                for (String s : tracked) {
+                    checkoutFile(s, id);
+                }
+            }
+        }
+    }
+
+    public void merge(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+
         }
     }
 
