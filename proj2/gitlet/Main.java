@@ -49,7 +49,7 @@ public class Main {
             case "checkout":
                 repo.checkout(args);
                 break;
-            case "branch:
+            case "branch":
                 repo.branch(args);
                 break;
             case "rm-branch":
