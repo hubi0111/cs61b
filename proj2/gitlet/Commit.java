@@ -76,9 +76,13 @@ public class Commit implements Serializable {
      * @source http://tutorials.jenkov.com/java-internationalization/simpledateformat.html
      */
     public void setTime() {
-        SimpleDateFormat d = new SimpleDateFormat("EEE MMM dd hh:mm:ss YYYY");
+        SimpleDateFormat d = new SimpleDateFormat("EEE MMM d hh:mm:ss YYYY");
         Date date = new Date();
         this.time = d.format(date) + " -0800";
+    }
+
+    public void setTime(String time){
+        this.time = time;
     }
 
     public String getParent() {

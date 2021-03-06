@@ -80,7 +80,8 @@ public class Repository {
             COMMITS.mkdir();
             REMOVED.mkdir();
             STAGED.mkdir();
-            Commit initial_commit = new Commit("inital commit", null);
+            Commit initial_commit = new Commit("initial commit", null);
+            initial_commit.setTime("Thu Jan 1 00:00:00 1970 -0800");
             saveCommit(initial_commit);
             File master = new File(BRANCHES, "master");
             String commit_id = initial_commit.getId();
@@ -183,10 +184,10 @@ public class Repository {
             String id = args[1];
             String file = args[3];
             if (id.length() == 40) {
-                checkoutFile(id, file);
+                checkoutFile(file, id);
             } else {
                 String hashId = sha1(id);
-                checkoutFile(hashId, file);
+                checkoutFile(file, hashId);
             }
         } else if (args.length == 2) {
             String branch = args[1];
