@@ -227,6 +227,11 @@ public class Repository {
             String[] modifications = null; //TODO
             String[] untracked = null; //TODO
             String curBranch = readContentsAsString(HEAD);
+            Arrays.sort(branches);
+            Arrays.sort(staged);
+            Arrays.sort(removed);
+//            Arrays.sort(modifications);
+//            Arrays.sort(untracked);
             System.out.println("=== Branches ===");
             for (String b : branches) {
                 if (b.equals(curBranch)) {
@@ -234,22 +239,27 @@ public class Repository {
                 }
                 System.out.println(b);
             }
+            System.out.println();
             System.out.println("=== Staged Files ===");
             for (String s : staged) {
                 System.out.println(s);
             }
+            System.out.println();
             System.out.println("=== Removed Files ===");
             for (String r : removed) {
                 System.out.println(r);
             }
+            System.out.println();
             System.out.println("=== Modifications Not Staged For Commit ===");
 //            for (String m : modifications) {
 //                System.out.println(m);
 //            }
+            System.out.println();
             System.out.println("=== Untracked Files ===");
 //            for (String u : untracked) {
 //                System.out.println(u);
 //            }
+            System.out.println();
         }
     }
 
@@ -310,7 +320,7 @@ public class Repository {
             File remove = new File(BRANCHES, branch);
             if (!remove.exists()) {
                 System.out.println("A branch with that name does not exist.");
-            } else if (remove.equals(readContentsAsString(HEAD))) {
+            } else if (branch.equals(readContentsAsString(HEAD))) {
                 System.out.println("Cannot remove the current branch.");
             } else {
                 remove.delete();

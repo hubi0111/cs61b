@@ -7,7 +7,7 @@
 ### Main
 
 This is the entry point to our program.
-It takes in arguments from the command line and based on the command (the first element of the args array) calls the corresponding command in CapersRepository which will actually execute the logic of the command.
+It takes in arguments from the command line and based on the command (the first element of the args array) calls the corresponding command in Repository which will actually execute the logic of the command.
 It will also make sure that we are in an initialized git repository before using any commands.
 
 #### Fields
