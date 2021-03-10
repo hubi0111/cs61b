@@ -30,27 +30,27 @@ public class Repository {
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
     /**
-     * The .gitlet directory.
+     * The blobs directory.
      */
     public static final File BLOBS = join(GITLET_DIR, "blobs");
 
     /**
-     * The .gitlet directory.
+     * The branches directory.
      */
     public static final File BRANCHES = join(GITLET_DIR, "branches");
 
     /**
-     * The .gitlet directory.
+     * The commits directory.
      */
     public static final File COMMITS = join(GITLET_DIR, "commits");
 
     /**
-     * The .gitlet directory.
+     * The removed directory.
      */
     public static final File REMOVED = join(GITLET_DIR, "removed");
 
     /**
-     * The .gitlet directory.
+     * The staged directory.
      */
     public static final File STAGED = join(GITLET_DIR, "staged");
 
@@ -273,7 +273,7 @@ public class Repository {
             String id = args[1];
             String file = args[3];
             if (id.length() != 40) {
-                id = sha1(id);
+                id = getLongId(id);
             }
             checkoutFile(file, id);
         } else if (args.length == 2) {
@@ -360,7 +360,7 @@ public class Repository {
 
     private void checkoutFile(String name, String id) {
         File file = new File(COMMITS, id);
-        if (!file.exists()) {
+        if (id == null || !file.exists()) {
             System.out.println("No commit with that id exists.");
         } else {
             Commit commit = getCommit(id);
@@ -451,5 +451,14 @@ public class Repository {
         }
         File file = new File(COMMITS, id);
         return readObject(file, Commit.class);
+    }
+
+    private String getLongId(String shortId) {
+        for (String id : COMMITS.list()) {
+            if (id.substring(0, shortId.length()).equals(shortId)) {
+                return id;
+            }
+        }
+        return null;
     }
 }
