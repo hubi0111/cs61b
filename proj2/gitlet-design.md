@@ -54,7 +54,7 @@ The Commit class has helpful methods that will perform various operations to the
 
 ## Algorithms
 
-
+All methods will have a javadoc above explaining what it does and how it accomplishes this.
 
 ## Persistence
 

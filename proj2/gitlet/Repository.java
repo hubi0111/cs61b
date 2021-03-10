@@ -328,27 +328,37 @@ public class Repository {
         }
     }
 
+    /**
+     * resets all files to a given commit
+     *
+     * @param args
+     */
     public void reset(String[] args) {
         if (args.length != 2) {
             System.out.println("Incorrect operands.");
             System.exit(0);
         } else {
             String id = args[1];
+            if (id.length() != 40) {
+                id = getLongId(id);
+            }
             File file = new File(COMMITS, id);
             if (!file.exists()) {
                 System.out.println("No commit with that id exists.");
             } else {
-                if (id.length() != 40) {
-                    id = sha1(id);
-                }
-                Set<String> tracked = getCommit(id).getTrackedFiles().keySet();
-                for (String s : tracked) {
-                    checkoutFile(s, id);
-                }
+                checkoutBranch(id);
+                String curHEAD = readContentsAsString(HEAD);
+                File branch = new File(BRANCHES, curHEAD);
+                writeContents(branch, id);
             }
         }
     }
 
+    /**
+     * merges all files from the given branch to the current one
+     *
+     * @param args
+     */
     public void merge(String[] args) {
         if (args.length != 2) {
             System.out.println("Incorrect operands.");
@@ -358,6 +368,15 @@ public class Repository {
         }
     }
 
+    /**
+     * checks out the file name to the commit with id id
+     * will look at the tracked files of the specified commit and retrieve the sha1 hash of the requested file
+     * then looks in blobs and finds the correct file with the sha1 hash
+     * replaces the file with the one from blobs
+     *
+     * @param name file name
+     * @param id   commit id
+     */
     private void checkoutFile(String name, String id) {
         File file = new File(COMMITS, id);
         if (id == null || !file.exists()) {
@@ -376,6 +395,15 @@ public class Repository {
         }
     }
 
+    /**
+     * Helper method to checkout to a branch
+     * Will try to replace all files in directory with those that are tracekd by the most recent commit the specified branch
+     * Identical files will not be affected
+     * Non-existent files will be added
+     * Files that no longer exist will be deleted
+     *
+     * @param id branch to checkout to
+     */
     private void checkoutBranch(String id) {
         Commit commit = getHEAD();
         Set<String> tracked = commit.getTrackedFiles().keySet();
@@ -405,6 +433,11 @@ public class Repository {
         }
     }
 
+    /**
+     * gets the next commit if there is any by looking at parent
+     *
+     * @param commit current commit
+     */
     private void printNextLog(Commit commit) {
         if (commit == null) {
             return;
@@ -415,6 +448,11 @@ public class Repository {
         }
     }
 
+    /**
+     * Prints a single log of the specified commit
+     *
+     * @param commit commit to be printed
+     */
     private void printLog(Commit commit) {
         if (commit == null) {
             return;
@@ -431,12 +469,24 @@ public class Repository {
         System.out.println();
     }
 
+    /**
+     * gets the head pointer
+     * first looks at contents of HEAD file and get's the branch
+     * then goes into branches folder and returns the commit that the file is pointing towards.
+     *
+     * @return HEAD commit
+     */
     private Commit getHEAD() {
         String curBranch = readContentsAsString(HEAD);
         File f = new File(BRANCHES, curBranch);
         return getCommit(readContentsAsString(f));
     }
 
+    /**
+     * Writes the commit to the commit folder in .gitlet
+     *
+     * @param commit commit object to add
+     */
     private void saveCommit(Commit commit) {
         byte[] serialized = serialize(commit);
         String id = sha1(serialized);
@@ -445,6 +495,12 @@ public class Repository {
         writeObject(file, commit);
     }
 
+    /**
+     * Takes in a string corresponding to the commit id and returns the Commit object correspondingly
+     *
+     * @param id id fo the commit wanted
+     * @return the Commit wanted
+     */
     private Commit getCommit(String id) {
         if (id == null) {
             return null;
@@ -453,6 +509,13 @@ public class Repository {
         return readObject(file, Commit.class);
     }
 
+    /**
+     * Takes in the short id and iterates through commit folder to find commit with that prefix
+     * Could be improved taking inspiration from actual git and dividing commits into folder by prefix of id
+     *
+     * @param shortId prefix of commit id
+     * @return returns the full commit id
+     */
     private String getLongId(String shortId) {
         for (String id : COMMITS.list()) {
             if (id.substring(0, shortId.length()).equals(shortId)) {
