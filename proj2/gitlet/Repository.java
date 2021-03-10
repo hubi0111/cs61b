@@ -59,7 +59,11 @@ public class Repository {
      */
     public static final File HEAD = join(GITLET_DIR, "HEAD");
 
-
+    /**
+     * sets up persistance and creates inital commit
+     *
+     * @param args
+     */
     public void init(String[] args) {
         if (args.length != 1) {
             System.out.println("Incorrect operands.");
@@ -86,6 +90,11 @@ public class Repository {
 
     }
 
+    /**
+     * adds the specified file to staged folder if it is altered
+     *
+     * @param args
+     */
     public void add(String[] args) {
         if (args.length != 2) {
             System.out.println("Incorrect operands.");
@@ -111,6 +120,18 @@ public class Repository {
         }
     }
 
+    /**
+     * updates all currently tracked files accoding to the following
+     * 1. gets the previous commits currently tracked files
+     * 2. or add files in either staged or removed, remove them from the hashmap
+     * 3. for add files in staged, add them to the hashmap
+     * this is because we have altered the file, and need to replace the old tracked with the new one
+     * 4. for all altered files, create a new blob
+     * 5. writes the commit with the new tracked files
+     * 6. delete everything in staged and removed
+     *
+     * @param args
+     */
     public void commit(String[] args) {
         if (args.length != 2) {
             System.out.println("Incorrect operands.");
@@ -156,6 +177,13 @@ public class Repository {
         }
     }
 
+    /**
+     * removes the file from either staged or the currently tracked files
+     * first checks if we can remove from tracked
+     * if not, then remove from directory
+     *
+     * @param args
+     */
     public void rm(String[] args) {
         if (args.length != 2) {
             System.out.println("Incorrect operands.");
@@ -176,6 +204,12 @@ public class Repository {
         }
     }
 
+    /**
+     * prints a commit history
+     * does this recursively by starting at head until commit parent is null
+     *
+     * @param args
+     */
     public void log(String[] args) {
         if (args.length != 1) {
             System.out.println("Incorrect operands.");
@@ -185,6 +219,11 @@ public class Repository {
         }
     }
 
+    /**
+     * log but for all commits
+     *
+     * @param args
+     */
     public void globalLog(String[] args) {
         if (args.length != 1) {
             System.out.println("Incorrect operands.");
@@ -197,6 +236,12 @@ public class Repository {
         }
     }
 
+    /**
+     * finds all commits of the given message
+     * does this by looping through commits and checking the message is equal to the specified message
+     *
+     * @param args
+     */
     public void find(String[] args) {
         if (args.length != 2) {
             System.out.println("Incorrect operands.");
@@ -216,6 +261,11 @@ public class Repository {
         }
     }
 
+    /**
+     * prints a status log of the current repository
+     *
+     * @param args
+     */
     public void status(String[] args) {
         if (args.length != 1) {
             System.out.println("Incorrect operands.");
@@ -263,6 +313,11 @@ public class Repository {
         }
     }
 
+    /**
+     * depending on the arguments, perform a checkout method
+     *
+     * @param args
+     */
     public void checkout(String[] args) {
         if (args.length == 3 && args[1].equals("--")) {
             String curBranch = readContentsAsString(HEAD);
@@ -294,6 +349,11 @@ public class Repository {
         }
     }
 
+    /**
+     * creates a new branch in the branches folder of the given name and copies the current branch
+     *
+     * @param args
+     */
     public void branch(String[] args) {
         if (args.length != 2) {
             System.out.println("Incorrect operands.");
@@ -311,6 +371,11 @@ public class Repository {
         }
     }
 
+    /**
+     * removes the specified branch from the branches folder.
+     *
+     * @param args
+     */
     public void rmBranch(String[] args) {
         if (args.length != 2) {
             System.out.println("Incorrect operands.");
@@ -330,6 +395,9 @@ public class Repository {
 
     /**
      * resets all files to a given commit
+     * checks out to the specified branch
+     * then reads head to get the current branch
+     * finally goes into branch folder and updates current branch to most commit
      *
      * @param args
      */
@@ -397,7 +465,7 @@ public class Repository {
 
     /**
      * Helper method to checkout to a branch
-     * Will try to replace all files in directory with those that are tracekd by the most recent commit the specified branch
+     * Will try to replace all files in directory with those that are traced by the most recent commit the specified branch
      * Identical files will not be affected
      * Non-existent files will be added
      * Files that no longer exist will be deleted
