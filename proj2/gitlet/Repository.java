@@ -149,20 +149,21 @@ public class Repository {
             } else {
                 Commit head = getHEAD();
                 HashMap<String, String> curTracked = head.getTrackedFiles();
+                HashMap<String, String> newTracked = curTracked;
                 for (String name : curTracked.keySet()) {
-                    if (staged.contains(name) || removed.contains(name)) {
-                        curTracked.remove(name);
+                    if (!staged.contains(name) && !removed.contains(name)) {
+                        newTracked.remove(name);
                     }
                 }
                 for (String name : staged) {
                     File file = new File(STAGED, name);
                     String id = sha1(readContents(file));
-                    curTracked.put(name, id);
+                    newTracked.put(name, id);
                     File blob = new File(BLOBS, id);
                     writeContents(blob, readContentsAsString(file));
                 }
                 Commit commit = new Commit(message, head.getId());
-                commit.setTrackedFiles(curTracked);
+                commit.setTrackedFiles(newTracked);
                 saveCommit(commit);
                 String branch = readContentsAsString(HEAD);
                 File b = new File(BRANCHES, branch);
