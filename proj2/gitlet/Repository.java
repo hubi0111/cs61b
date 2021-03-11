@@ -152,7 +152,7 @@ public class Repository {
                 HashMap<String, String> newTracked = curTracked;
                 for (String name : curTracked.keySet()) {
                     if (!staged.contains(name) && !removed.contains(name)) {
-                        newTracked.remove(name);
+                        newTracked.put(name, curTracked.get(name));
                     }
                 }
                 for (String name : staged) {
