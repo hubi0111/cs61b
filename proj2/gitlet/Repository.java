@@ -1,10 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -276,13 +273,14 @@ public class Repository {
             String[] staged = STAGED.list();
             String[] removed = REMOVED.list();
             String[] modifications = null; //TODO
-            String[] untracked = null; //TODO
+            String[] untracked = new String[getUntrackedFiles().size()];
+            getUntrackedFiles().toArray(untracked);
             String curBranch = readContentsAsString(HEAD);
             Arrays.sort(branches);
             Arrays.sort(staged);
             Arrays.sort(removed);
 //            Arrays.sort(modifications);
-//            Arrays.sort(untracked);
+            Arrays.sort(untracked);
             System.out.println("=== Branches ===");
             for (String b : branches) {
                 if (b.equals(curBranch)) {
@@ -307,9 +305,9 @@ public class Repository {
 //            }
             System.out.println();
             System.out.println("=== Untracked Files ===");
-//            for (String u : untracked) {
-//                System.out.println(u);
-//            }
+            for (String u : untracked) {
+                System.out.println(u);
+            }
             System.out.println();
         }
     }
@@ -433,8 +431,67 @@ public class Repository {
             System.out.println("Incorrect operands.");
             System.exit(0);
         } else {
-            //do merge
+            HashSet<String> staged = new HashSet<>(Arrays.asList(STAGED.list()));
+            HashSet<String> removed = new HashSet<>(Arrays.asList(REMOVED.list()));
+            String branch = args[1];
+            File targetBranch = new File(BRANCHES, branch);
+            String curBranch = readContentsAsString(HEAD);
+            if (!staged.isEmpty() || !removed.isEmpty()) {
+                System.out.println("You have uncommitted changes.");
+                System.exit(0);
+            } else if (!targetBranch.exists()) {
+                System.out.println("A branch with that name does not exist.");
+                System.exit(0);
+            } else if (branch.equals(curBranch)) {
+                System.out.println("Cannot merge a branch with itself.");
+                System.exit(0);
+            }
+            boolean safeToMerge = true;
+            //check if any untracked files will be overwritten
+            String id = readContentsAsString(targetBranch);
+            HashMap<String, String> curTracked = getHEAD().getTrackedFiles();
+            HashMap<String, String> mergeTracked = getCommit(id).getTrackedFiles();
+            String splitId; //TODO
+            for (String name : getUntrackedFiles()) {
+                if (mergeTracked.keySet().contains(name)) {
+                    safeToMerge = false;
+                }
+            }
+            if (!safeToMerge) {
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.exit(0);
+            }
+
         }
+    }
+
+    /**
+     * returns the split point between current branch and target branch
+     *
+     * @param branch target branch
+     * @return the commit id of the split point
+     */
+    private String splitPoint(String branch) {
+        return null;
+    }
+
+    /**
+     * returns a HashSet of all files in the working directory that are untracked
+     *
+     * @return HashSet of untracked files
+     */
+    private HashSet<String> getUntrackedFiles() {
+        HashSet<String> untracked = new HashSet<>();
+        List<String> allFiles = plainFilenamesIn(CWD);
+        for (String name : allFiles) {
+            boolean tracked = getHEAD().getTrackedFiles().keySet().contains(name);
+            File staged = new File(STAGED, name);
+            File removed = new File(REMOVED, name);
+            if ((!tracked && !staged.exists()) || removed.exists()) {
+                untracked.add(name);
+            }
+        }
+        return untracked;
     }
 
     /**
