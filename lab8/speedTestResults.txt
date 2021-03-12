@@ -1,0 +1,15 @@
+InsertRandomSpeedTest (L = 10)
+1: 0.00
+10: 0.00
+100: 0.00
+1000: 0.01
+10000: 0.26
+
+InsertInOrderSpeedTest
+1: 0.00
+10: 0.00
+100: 0.00
+1000: 0.01
+10000: 0.79
+
+Tree maps are more useful if we need the elements to be sorted in ascending order, else hashmaps are more useful.
