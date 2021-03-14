@@ -272,14 +272,15 @@ public class Repository {
             String[] branches = BRANCHES.list();
             String[] staged = STAGED.list();
             String[] removed = REMOVED.list();
-            String[] modifications = null; //TODO
+            String[] modifications = new String[getModifiedFiles().size()];
             String[] untracked = new String[getUntrackedFiles().size()];
             getUntrackedFiles().toArray(untracked);
+            getModifiedFiles().toArray(modifications);
             String curBranch = readContentsAsString(HEAD);
             Arrays.sort(branches);
             Arrays.sort(staged);
             Arrays.sort(removed);
-//            Arrays.sort(modifications);
+            Arrays.sort(modifications);
             Arrays.sort(untracked);
             System.out.println("=== Branches ===");
             for (String b : branches) {
@@ -300,9 +301,9 @@ public class Repository {
             }
             System.out.println();
             System.out.println("=== Modifications Not Staged For Commit ===");
-//            for (String m : modifications) {
-//                System.out.println(m);
-//            }
+            for (String m : modifications) {
+                System.out.println(m);
+            }
             System.out.println();
             System.out.println("=== Untracked Files ===");
             for (String u : untracked) {
@@ -434,34 +435,55 @@ public class Repository {
             HashSet<String> staged = new HashSet<>(Arrays.asList(STAGED.list()));
             HashSet<String> removed = new HashSet<>(Arrays.asList(REMOVED.list()));
             String branch = args[1];
-            File targetBranch = new File(BRANCHES, branch);
+            File mergeBranch = new File(BRANCHES, branch);
             String curBranch = readContentsAsString(HEAD);
             if (!staged.isEmpty() || !removed.isEmpty()) {
                 System.out.println("You have uncommitted changes.");
                 System.exit(0);
-            } else if (!targetBranch.exists()) {
+            } else if (!mergeBranch.exists()) {
                 System.out.println("A branch with that name does not exist.");
                 System.exit(0);
             } else if (branch.equals(curBranch)) {
                 System.out.println("Cannot merge a branch with itself.");
                 System.exit(0);
             }
-            boolean safeToMerge = true;
+            boolean safeToMerge = false;
             //check if any untracked files will be overwritten
-            String id = readContentsAsString(targetBranch);
+            String mergeId = readContentsAsString(mergeBranch);
+            String curId = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
             HashMap<String, String> curTracked = getHEAD().getTrackedFiles();
-            HashMap<String, String> mergeTracked = getCommit(id).getTrackedFiles();
-            String splitId; //TODO
+            HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
+            String splitId = splitPoint(branch);
+            HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
             for (String name : getUntrackedFiles()) {
-                if (mergeTracked.keySet().contains(name)) {
-                    safeToMerge = false;
+                String split = splitTracked.get(name);
+                String merge = mergeTracked.get(name);
+                String cur = curTracked.get(name);
+                if (split == null && merge == null && cur == null) {
+                    continue;
+                } else if (split.equals(cur) && !split.equals(merge)) {
+                    safeToMerge = true;
+                    break;
+                } else if (split.equals(merge) && !cur.equals(merge)) {
+                    continue;
+                } else {
+                    safeToMerge = true;
+                    break;
                 }
             }
-            if (!safeToMerge) {
+            if (safeToMerge) {
                 System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 System.exit(0);
             }
+            if (splitId.equals(mergeId)) {
+                System.out.println("Given branch is an ancestor of the current branch.");
+            } else if (splitId.equals(curId)) {
+                File file = new File(BRANCHES, curBranch);
+                writeContents(file, mergeId);
+                System.out.println("Current branch fast-forwarded.");
+            } else {
 
+            }
         }
     }
 
@@ -472,6 +494,16 @@ public class Repository {
      * @return the commit id of the split point
      */
     private String splitPoint(String branch) {
+        File mergeBranch = new File(BRANCHES, branch);
+        String mergeCommit = readContentsAsString(mergeBranch);
+        String curCommit = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
+        String mergeParent = getCommit(mergeCommit).getParent();
+        String curParent = getCommit(curCommit).getParent();
+        Set<String> merge = new HashSet<>();
+        Set<String> cur = new HashSet<>();
+        while (mergeParent != null && curParent != null) {
+
+        }
         return null;
     }
 
@@ -482,7 +514,7 @@ public class Repository {
      */
     private HashSet<String> getUntrackedFiles() {
         HashSet<String> untracked = new HashSet<>();
-        List<String> allFiles = plainFilenamesIn(CWD);
+        List<String> allFiles = plainFilenamesIn(new File("."));
         for (String name : allFiles) {
             boolean tracked = getHEAD().getTrackedFiles().keySet().contains(name);
             File staged = new File(STAGED, name);
@@ -492,6 +524,49 @@ public class Repository {
             }
         }
         return untracked;
+    }
+
+    /**
+     * returns a HashSet of all files in the working directory that are modified
+     *
+     * @return HashSet of modified files
+     */
+    private HashSet<String> getModifiedFiles() {
+        HashSet<String> modified = new HashSet<>();
+        List<String> allFiles = plainFilenamesIn(new File("."));
+        for (String name : allFiles) {
+            boolean tracked = getHEAD().getTrackedFiles().keySet().contains(name);
+            File file = new File(name);
+            String fileSHA = sha1(readContents(file));
+            String currentSHA = getHEAD().getTrackedFiles().get(name);
+            boolean changed = !fileSHA.equals(currentSHA);
+            File staged = new File(STAGED, name);
+            boolean isStaged = staged.exists();
+            if (tracked && changed && !isStaged) {
+                modified.add(name + "(modified)");
+            }
+            if (isStaged) {
+                String sha = sha1(readContents(staged));
+                if (!fileSHA.equals(sha)) {
+                    modified.add(name + "(modified)");
+                }
+            }
+        }
+
+        for (String name : STAGED.list()) {
+            File file = new File(name);
+            if (!file.exists()) {
+                modified.add(name + "(modified)");
+            }
+        }
+        for (String name : getHEAD().getTrackedFiles().keySet()) {
+            File file = new File(name);
+            File removed = new File(REMOVED, name);
+            if (!file.exists() && !removed.exists()) {
+                modified.add(name + "(modified)");
+            }
+        }
+        return modified;
     }
 
     /**
