@@ -448,7 +448,6 @@ public class Repository {
                 System.exit(0);
             }
             boolean safeToMerge = false;
-            //check if any untracked files will be overwritten
             String mergeId = readContentsAsString(mergeBranch);
             String curId = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
             HashMap<String, String> curTracked = getHEAD().getTrackedFiles();
@@ -456,6 +455,7 @@ public class Repository {
             String splitId = splitPoint(branch);
             HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
             for (String name : getUntrackedFiles()) {
+                System.out.println("for");
                 String split = splitTracked.get(name);
                 String merge = mergeTracked.get(name);
                 String cur = curTracked.get(name);
@@ -502,7 +502,7 @@ public class Repository {
         Set<String> merge = new HashSet<>();
         Set<String> cur = new HashSet<>();
         while (mergeParent != null && curParent != null) {
-
+            break; //TODO
         }
         return null;
     }
@@ -543,12 +543,12 @@ public class Repository {
             File staged = new File(STAGED, name);
             boolean isStaged = staged.exists();
             if (tracked && changed && !isStaged) {
-                modified.add(name + "(modified)");
+                modified.add(name + " (modified)");
             }
             if (isStaged) {
                 String sha = sha1(readContents(staged));
                 if (!fileSHA.equals(sha)) {
-                    modified.add(name + "(modified)");
+                    modified.add(name + " (modified)");
                 }
             }
         }
@@ -556,14 +556,14 @@ public class Repository {
         for (String name : STAGED.list()) {
             File file = new File(name);
             if (!file.exists()) {
-                modified.add(name + "(modified)");
+                modified.add(name + " (deleted)");
             }
         }
         for (String name : getHEAD().getTrackedFiles().keySet()) {
             File file = new File(name);
             File removed = new File(REMOVED, name);
             if (!file.exists() && !removed.exists()) {
-                modified.add(name + "(modified)");
+                modified.add(name + " (deleted)");
             }
         }
         return modified;
