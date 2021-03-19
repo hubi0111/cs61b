@@ -544,7 +544,9 @@ public class Repository {
             String mergeId2 = mergeTracked.get(name);
             String curId2 = curTracked.get(name);
             if ((splitId2 == null && curId2 == null || splitId2.equals(curId2))
-                    && !(splitId2 == null && mergeId2 == null || splitId2.equals(mergeId2))
+                    && ((splitId2 != null && mergeId2 == null
+                    || splitId2 == null && mergeId2 != null)
+                    || !splitId2.equals(mergeId2))
                     && mergeId2 != null) {
                 checkoutFile(name, mergeId2);
                 File file = new File(name);
@@ -554,8 +556,12 @@ public class Repository {
                     || splitId2.equals(curId2) && mergeId2 == null) {
                 String[] args = new String[]{"rm", name};
                 rm(args);
-            } else if (!(splitId2 == null && mergeId2 == null || splitId2.equals(mergeId2))
-                    && !(curId2 == null && mergeId2 == null || curId2.equals(mergeId2))) {
+            } else if (((splitId2 != null && mergeId2 == null
+                    || splitId2 == null && mergeId2 != null)
+                    || !splitId2.equals(mergeId2))
+                    && ((curId2 != null && mergeId2 == null
+                    || curId2 == null && mergeId2 != null)
+                    || !curId2.equals(mergeId2))) {
                 String curFile = "";
                 String mergeFile = "";
                 if (splitId2 != null) {
