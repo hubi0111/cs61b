@@ -1,7 +1,11 @@
 package gitlet;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static gitlet.Utils.*;
 
@@ -122,7 +126,8 @@ public class Repository {
      * 1. gets the previous commits currently tracked files
      * 2. or add files in either staged or removed, remove them from the hashmap
      * 3. for add files in staged, add them to the hashmap
-     * this is because we have altered the file, and need to replace the old tracked with the new one
+     * this is because we have altered the file,
+     * and need to replace the old tracked with the new one
      * 4. for all altered files, create a new blob
      * 5. writes the commit with the new tracked files
      * 6. delete everything in staged and removed
@@ -236,7 +241,8 @@ public class Repository {
 
     /**
      * finds all commits of the given message
-     * does this by looping through commits and checking the message is equal to the specified message
+     * does this by looping through commits
+     * and checking the message is equal to the specified message
      *
      * @param args
      */
@@ -301,9 +307,9 @@ public class Repository {
             }
             System.out.println();
             System.out.println("=== Modifications Not Staged For Commit ===");
-            for (String m : modifications) {
-                System.out.println(m);
-            }
+//            for (String m : modifications) {
+//                System.out.println(m);
+//            }
             System.out.println();
             System.out.println("=== Untracked Files ===");
             for (String u : untracked) {
@@ -472,7 +478,8 @@ public class Repository {
                 }
             }
             if (safeToMerge) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.out.println("There is an untracked file in the way;"
+                        + "delete it, or add and commit it first.");
                 System.exit(0);
             }
             if (splitId.equals(mergeId)) {
@@ -482,9 +489,97 @@ public class Repository {
                 writeContents(file, mergeId);
                 System.out.println("Current branch fast-forwarded.");
             } else {
-
+                if (isConflict(splitTracked, mergeTracked, curTracked)) {
+                    System.out.println("Encountered a merge conflict.");
+                }
+                HashSet<String> stagedFiles = new HashSet<>(Arrays.asList(STAGED.list()));
+                HashSet<String> removedFiles = new HashSet<>(Arrays.asList(REMOVED.list()));
+                String message = "Merged " + branch + " into " + curBranch + ".";
+                if (stagedFiles.isEmpty() && removedFiles.isEmpty()) {
+                    System.out.println("No changes added to the commit.");
+                    System.exit(0);
+                } else {
+                    Commit head = getHEAD();
+                    HashMap<String, String> curTracked2 = head.getTrackedFiles();
+                    HashMap<String, String> newTracked2 = curTracked2;
+                    for (String name : curTracked2.keySet()) {
+                        if (!stagedFiles.contains(name) && !removedFiles.contains(name)) {
+                            newTracked2.put(name, curTracked2.get(name));
+                        }
+                    }
+                    for (String name : stagedFiles) {
+                        File file = new File(STAGED, name);
+                        String id = sha1(readContents(file));
+                        newTracked2.put(name, id);
+                        File blob = new File(BLOBS, id);
+                        writeContents(blob, readContentsAsString(file));
+                    }
+                    Commit commit = new Commit(message, head.getId());
+                    commit.setTrackedFiles(newTracked2);
+                    commit.setMergeParent(branch);
+                    saveCommit(commit);
+                    String branch2 = readContentsAsString(HEAD);
+                    File b = new File(BRANCHES, branch2);
+                    writeContents(b, commit.getId());
+                    for (File file : STAGED.listFiles()) {
+                        file.delete();
+                    }
+                    for (File file : REMOVED.listFiles()) {
+                        file.delete();
+                    }
+                }
             }
         }
+    }
+
+    private boolean isConflict(HashMap<String, String> splitTracked,
+                               HashMap<String, String> mergeTracked,
+                               HashMap<String, String> curTracked) {
+        HashSet<String> files = new HashSet<>();
+        files.addAll(splitTracked.keySet());
+        files.addAll(mergeTracked.keySet());
+        files.addAll(curTracked.keySet());
+        for (String name : files) {
+            String splitId2 = splitTracked.get(name);
+            String mergeId2 = mergeTracked.get(name);
+            String curId2 = curTracked.get(name);
+            if ((splitId2 == null && curId2 == null || splitId2.equals(curId2))
+                    && !(splitId2 == null && mergeId2 == null || splitId2.equals(mergeId2))
+                    && mergeId2 != null) {
+                checkoutFile(name, mergeId2);
+                File file = new File(name);
+                File staged = new File(STAGED, name);
+                writeContents(staged, readContentsAsString(file));
+            } else if ((splitId2 == null && curId2 == null)
+                    || splitId2.equals(curId2) && mergeId2 == null) {
+                String[] args = new String[]{"rm", name};
+                rm(args);
+            } else if (!(splitId2 == null && mergeId2 == null || splitId2.equals(mergeId2))
+                    && !(curId2 == null && mergeId2 == null || curId2.equals(mergeId2))) {
+                String curFile = "";
+                String mergeFile = "";
+                if (splitId2 != null) {
+                    File file = new File(COMMITS, curId2);
+                    curFile = readContentsAsString(file);
+                }
+                if (mergeId2 != null) {
+                    File file = new File(COMMITS, mergeId2);
+                    mergeFile = readContentsAsString(file);
+                }
+                File file = new File(name);
+                String text = "<<<<<<< HEAD\n"
+                        + curFile
+                        + "=======\n"
+                        + mergeFile
+                        + ">>>>>>>\n";
+                writeContents(file, text);
+                File staged2 = new File(STAGED, name);
+                writeContents(staged2, text);
+                return true;
+            }
+
+        }
+        return false;
     }
 
     /**
@@ -502,7 +597,16 @@ public class Repository {
         Set<String> merge = new HashSet<>();
         Set<String> cur = new HashSet<>();
         while (mergeParent != null && curParent != null) {
-            break; //TODO
+            if (cur.contains(mergeCommit) || mergeParent.equals(curCommit)) {
+                return mergeCommit;
+            } else if (merge.contains(curCommit)) {
+                return curCommit;
+            } else {
+                merge.add(mergeCommit);
+                cur.add(curCommit);
+                mergeCommit = mergeParent;
+                curCommit = curParent;
+            }
         }
         return null;
     }
@@ -571,7 +675,8 @@ public class Repository {
 
     /**
      * checks out the file name to the commit with id id
-     * will look at the tracked files of the specified commit and retrieve the sha1 hash of the requested file
+     * will look at the tracked files of the specified commit
+     * and retrieve the sha1 hash of the requested file
      * then looks in blobs and finds the correct file with the sha1 hash
      * replaces the file with the one from blobs
      *
@@ -598,7 +703,8 @@ public class Repository {
 
     /**
      * Helper method to checkout to a branch
-     * Will try to replace all files in directory with those that are traced by the most recent commit the specified branch
+     * Will try to replace all files in directory with those
+     * that are traced by the most recent commit the specified branch
      * Identical files will not be affected
      * Non-existent files will be added
      * Files that no longer exist will be deleted
@@ -697,7 +803,8 @@ public class Repository {
     }
 
     /**
-     * Takes in a string corresponding to the commit id and returns the Commit object correspondingly
+     * Takes in a string corresponding to the commit id
+     * and returns the Commit object correspondingly
      *
      * @param id id fo the commit wanted
      * @return the Commit wanted
@@ -712,7 +819,8 @@ public class Repository {
 
     /**
      * Takes in the short id and iterates through commit folder to find commit with that prefix
-     * Could be improved taking inspiration from actual git and dividing commits into folder by prefix of id
+     * Could be improved taking inspiration from actual git
+     * and dividing commits into folder by prefix of id
      *
      * @param shortId prefix of commit id
      * @return returns the full commit id
