@@ -573,31 +573,31 @@ public class Repository {
         files.addAll(mergeTracked.keySet());
         files.addAll(curTracked.keySet());
         for (String name : files) {
-            String splitId2 = splitTracked.get(name);
-            String mergeId2 = mergeTracked.get(name);
-            String curId2 = curTracked.get(name);
-            if (specialEquals(splitId2, curId2)
-                    && !specialEquals(splitId2, mergeId2)
-                    && mergeId2 != null) {
+            String split = splitTracked.get(name);
+            String merge = mergeTracked.get(name);
+            String cur = curTracked.get(name);
+            if (specialEquals(split, cur)
+                    && !specialEquals(split, merge)
+                    && merge != null) {
                 checkoutFile(name, mergeId);
                 File file = new File(name);
                 File staged = new File(STAGED, name);
                 String s = readContentsAsString(file);
                 writeContents(staged, s);
-            } else if (specialEquals(splitId2, curId2)
-                    && mergeId2 == null) {
+            } else if (specialEquals(split, cur)
+                    && merge == null) {
                 String[] args = new String[]{"rm", name};
                 rm(args);
-            } else if (!specialEquals(splitId2, mergeId2)
-                    && !specialEquals(curId2, mergeId2)) {
+            } else if (!specialEquals(split, merge)
+                    && !specialEquals(cur, merge)) {
                 String curFile = "";
                 String mergeFile = "";
-                if (splitId2 != null) {
-                    File file = new File(COMMITS, curId2);
+                if (cur != null) {
+                    File file = new File(COMMITS, cur);
                     curFile = readContentsAsString(file);
                 }
-                if (mergeId2 != null) {
-                    File file = new File(COMMITS, mergeId2);
+                if (merge != null) {
+                    File file = new File(COMMITS, merge);
                     mergeFile = readContentsAsString(file);
                 }
                 File file = new File(name);
