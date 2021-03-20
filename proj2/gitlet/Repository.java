@@ -593,11 +593,11 @@ public class Repository {
                 String curFile = "";
                 String mergeFile = "";
                 if (cur != null) {
-                    File file = new File(COMMITS, cur);
+                    File file = new File(BLOBS, cur);
                     curFile = readContentsAsString(file);
                 }
                 if (merge != null) {
-                    File file = new File(COMMITS, merge);
+                    File file = new File(BLOBS, merge);
                     mergeFile = readContentsAsString(file);
                 }
                 File file = new File(name);
