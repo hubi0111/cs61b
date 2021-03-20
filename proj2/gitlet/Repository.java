@@ -453,35 +453,14 @@ public class Repository {
                 System.out.println("Cannot merge a branch with itself.");
                 System.exit(0);
             }
-            boolean safeToMerge = false;
-            String mergeId = readContentsAsString(mergeBranch);
-            String curId = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
-            HashMap<String, String> curTracked = getHEAD().getTrackedFiles();
-            HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
-            String splitId = splitPoint(branch);
-            HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
-            for (String name : getUntrackedFiles()) {
-                System.out.println("for");
-                String split = splitTracked.get(name);
-                String merge = mergeTracked.get(name);
-                String cur = curTracked.get(name);
-                if (split == null && merge == null && cur == null) {
-                    continue;
-                } else if (split.equals(cur) && !split.equals(merge)) {
-                    safeToMerge = true;
-                    break;
-                } else if (split.equals(merge) && !cur.equals(merge)) {
-                    continue;
-                } else {
-                    safeToMerge = true;
-                    break;
-                }
-            }
-            if (safeToMerge) {
+            if (safeToMerge(branch)) {
                 System.out.println("There is an untracked file in the way;"
                         + "delete it, or add and commit it first.");
                 System.exit(0);
             }
+            String splitId = splitPoint(branch);
+            String mergeId = readContentsAsString(mergeBranch);
+            String curId = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
             if (splitId.equals(mergeId)) {
                 System.out.println("Given branch is an ancestor of the current branch.");
             } else if (splitId.equals(curId)) {
@@ -489,7 +468,10 @@ public class Repository {
                 writeContents(file, mergeId);
                 System.out.println("Current branch fast-forwarded.");
             } else {
-                if (isConflict(splitTracked, mergeTracked, curTracked)) {
+                HashMap<String, String> curTracked = getHEAD().getTrackedFiles();
+                HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
+                HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
+                if (isConflict(splitTracked, mergeTracked, curTracked, mergeId)) {
                     System.out.println("Encountered a merge conflict.");
                 }
                 HashSet<String> stagedFiles = new HashSet<>(Arrays.asList(STAGED.list()));
@@ -532,9 +514,56 @@ public class Repository {
         }
     }
 
+    /**
+     * helper method that determines if it is safe to merge.
+     * Not necessary but method limit is 80 lines
+     *
+     * @return
+     */
+    private boolean safeToMerge(String branch) {
+        File mergeBranch = new File(BRANCHES, branch);
+        String mergeId = readContentsAsString(mergeBranch);
+        HashMap<String, String> curTracked = getHEAD().getTrackedFiles();
+        HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
+        String splitId = splitPoint(branch);
+        HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
+        for (String name : getUntrackedFiles()) {
+            String split = splitTracked.get(name);
+            String merge = mergeTracked.get(name);
+            String cur = curTracked.get(name);
+            if (split == null && merge == null && cur == null) {
+                continue;
+            } else if (((split == null && cur == null) || split.equals(cur))
+                    && ((split != null && merge == null
+                    || split == null && merge != null)
+                    || !split.equals(merge))) {
+                return true;
+            } else if (((split == null && merge == null) || split.equals(merge))
+                    || ((cur != null && merge == null
+                    || cur == null && merge != null)
+                    || !cur.equals(merge))) {
+                continue;
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * helper method that determines if there is a merge conflict.
+     * Not necessary but method limit is 80 lines
+     *
+     * @param splitTracked
+     * @param mergeTracked
+     * @param curTracked
+     * @param mergeId
+     * @return
+     */
     private boolean isConflict(HashMap<String, String> splitTracked,
                                HashMap<String, String> mergeTracked,
-                               HashMap<String, String> curTracked) {
+                               HashMap<String, String> curTracked,
+                               String mergeId) {
         HashSet<String> files = new HashSet<>();
         files.addAll(splitTracked.keySet());
         files.addAll(mergeTracked.keySet());
@@ -548,10 +577,11 @@ public class Repository {
                     || splitId2 == null && mergeId2 != null)
                     || !splitId2.equals(mergeId2))
                     && mergeId2 != null) {
-                checkoutFile(name, mergeId2);
+                checkoutFile(name, mergeId);
                 File file = new File(name);
                 File staged = new File(STAGED, name);
-                writeContents(staged, readContentsAsString(file));
+                String s = readContentsAsString(file);
+                writeContents(staged, s);
             } else if ((splitId2 == null && curId2 == null)
                     || splitId2.equals(curId2) && mergeId2 == null) {
                 String[] args = new String[]{"rm", name};
