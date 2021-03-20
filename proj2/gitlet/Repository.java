@@ -514,6 +514,14 @@ public class Repository {
         }
     }
 
+    private boolean specialEquals(String s1, String s2) {
+        if (s1 != null) {
+            return s1.equals(s2);
+        } else {
+            return s2 == null;
+        }
+    }
+
     /**
      * helper method that determines if it is safe to merge.
      * Not necessary but method limit is 80 lines
@@ -533,15 +541,11 @@ public class Repository {
             String cur = curTracked.get(name);
             if (split == null && merge == null && cur == null) {
                 continue;
-            } else if (((split == null && cur == null) || split.equals(cur))
-                    && ((split != null && merge == null
-                    || split == null && merge != null)
-                    || !split.equals(merge))) {
+            } else if (specialEquals(split, cur)
+                    && !specialEquals(split, merge)) {
                 return true;
-            } else if (((split == null && merge == null) || split.equals(merge))
-                    || ((cur != null && merge == null
-                    || cur == null && merge != null)
-                    || !cur.equals(merge))) {
+            } else if (specialEquals(split, merge)
+                    || specialEquals(cur, merge)) {
                 continue;
             } else {
                 return true;
@@ -572,26 +576,20 @@ public class Repository {
             String splitId2 = splitTracked.get(name);
             String mergeId2 = mergeTracked.get(name);
             String curId2 = curTracked.get(name);
-            if ((splitId2 == null && curId2 == null || splitId2.equals(curId2))
-                    && ((splitId2 != null && mergeId2 == null
-                    || splitId2 == null && mergeId2 != null)
-                    || !splitId2.equals(mergeId2))
+            if (specialEquals(splitId2, curId2)
+                    && !specialEquals(splitId2, mergeId2)
                     && mergeId2 != null) {
                 checkoutFile(name, mergeId);
                 File file = new File(name);
                 File staged = new File(STAGED, name);
                 String s = readContentsAsString(file);
                 writeContents(staged, s);
-            } else if ((splitId2 == null && curId2 == null)
-                    || splitId2.equals(curId2) && mergeId2 == null) {
+            } else if (specialEquals(splitId2, curId2)
+                    && mergeId2 == null) {
                 String[] args = new String[]{"rm", name};
                 rm(args);
-            } else if (((splitId2 != null && mergeId2 == null
-                    || splitId2 == null && mergeId2 != null)
-                    || !splitId2.equals(mergeId2))
-                    && ((curId2 != null && mergeId2 == null
-                    || curId2 == null && mergeId2 != null)
-                    || !curId2.equals(mergeId2))) {
+            } else if (!specialEquals(splitId2, mergeId2)
+                    && !specialEquals(curId2, mergeId2)) {
                 String curFile = "";
                 String mergeFile = "";
                 if (splitId2 != null) {
