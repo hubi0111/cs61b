@@ -445,69 +445,65 @@ public class Repository {
             String curBranch = readContentsAsString(HEAD);
             if (!staged.isEmpty() || !removed.isEmpty()) {
                 System.out.println("You have uncommitted changes.");
-                System.exit(0);
             } else if (!mergeBranch.exists()) {
                 System.out.println("A branch with that name does not exist.");
-                System.exit(0);
             } else if (branch.equals(curBranch)) {
                 System.out.println("Cannot merge a branch with itself.");
-                System.exit(0);
-            }
-            if (safeToMerge(branch)) {
+            } else if (safeToMerge(branch)) {
                 System.out.println("There is an untracked file in the way;"
                         + "delete it, or add and commit it first.");
-                System.exit(0);
-            }
-            String splitId = splitPoint(branch);
-            String mergeId = readContentsAsString(mergeBranch);
-            String curId = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
-            if (splitId.equals(mergeId)) {
-                System.out.println("Given branch is an ancestor of the current branch.");
-            } else if (splitId.equals(curId)) {
-                File file = new File(BRANCHES, curBranch);
-                writeContents(file, mergeId);
-                System.out.println("Current branch fast-forwarded.");
             } else {
-                HashMap<String, String> curTracked = getHEAD().getTrackedFiles();
-                HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
-                HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
-                if (isConflict(splitTracked, mergeTracked, curTracked, mergeId)) {
-                    System.out.println("Encountered a merge conflict.");
-                }
-                HashSet<String> stagedFiles = new HashSet<>(Arrays.asList(STAGED.list()));
-                HashSet<String> removedFiles = new HashSet<>(Arrays.asList(REMOVED.list()));
-                String message = "Merged " + branch + " into " + curBranch + ".";
-                if (stagedFiles.isEmpty() && removedFiles.isEmpty()) {
-                    System.out.println("No changes added to the commit.");
-                    System.exit(0);
+                String splitId = splitPoint(branch);
+                String mergeId = readContentsAsString(mergeBranch);
+                String curId = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
+                if (splitId.equals(mergeId)) {
+                    System.out.println("Given branch is an ancestor of the current branch.");
+                } else if (splitId.equals(curId)) {
+                    File file = new File(BRANCHES, curBranch);
+                    writeContents(file, mergeId);
+                    System.out.println("Current branch fast-forwarded.");
                 } else {
-                    Commit head = getHEAD();
-                    HashMap<String, String> curTracked2 = head.getTrackedFiles();
-                    HashMap<String, String> newTracked2 = curTracked2;
-                    for (String name : curTracked2.keySet()) {
-                        if (!stagedFiles.contains(name) && !removedFiles.contains(name)) {
-                            newTracked2.put(name, curTracked2.get(name));
+                    HashMap<String, String> curTracked = getCommit(curId).getTrackedFiles();
+                    HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
+                    HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
+                    if (isConflict(splitTracked, mergeTracked, curTracked, mergeId)) {
+                        System.out.println("Encountered a merge conflict.");
+                    }
+                    HashSet<String> stagedFiles = new HashSet<>(Arrays.asList(STAGED.list()));
+                    HashSet<String> removedFiles = new HashSet<>(Arrays.asList(REMOVED.list()));
+                    String message = "Merged " + branch + " into " + curBranch + ".";
+                    if (stagedFiles.isEmpty() && removedFiles.isEmpty()) {
+                        System.out.println("No changes added to the commit.");
+                        System.exit(0);
+                    } else {
+                        Commit head = getHEAD();
+                        HashMap<String, String> curTracked2 = head.getTrackedFiles();
+                        HashMap<String, String> newTracked2 = curTracked2;
+                        for (String name : curTracked2.keySet()) {
+                            if (!stagedFiles.contains(name) && !removedFiles.contains(name)) {
+                                newTracked2.put(name, curTracked2.get(name));
+                            }
                         }
-                    }
-                    for (String name : stagedFiles) {
-                        File file = new File(STAGED, name);
-                        String id = sha1(readContents(file));
-                        newTracked2.put(name, id);
-                        File blob = new File(BLOBS, id);
-                        writeContents(blob, readContentsAsString(file));
-                    }
-                    Commit commit = new Commit(message, head.getId());
-                    commit.setTrackedFiles(newTracked2);
-                    commit.setMergeParent(branch);
-                    saveCommit(commit);
-                    String branch2 = readContentsAsString(HEAD);
-                    File b = new File(BRANCHES, branch2);
-                    writeContents(b, commit.getId());
-                    for (File file : STAGED.listFiles()) {
-                        file.delete();
-                    }
-                    for (File file : REMOVED.listFiles()) {
-                        file.delete();
+                        for (String name : stagedFiles) {
+                            File file = new File(STAGED, name);
+                            String id = sha1(readContents(file));
+                            newTracked2.put(name, id);
+                            File blob = new File(BLOBS, id);
+                            writeContents(blob, readContentsAsString(file));
+                        }
+                        Commit commit = new Commit(message, head.getId());
+                        commit.setTrackedFiles(newTracked2);
+                        commit.setMergeParent(branch);
+                        saveCommit(commit);
+                        String branch2 = readContentsAsString(HEAD);
+                        File b = new File(BRANCHES, branch2);
+                        writeContents(b, commit.getId());
+                        for (File file : STAGED.listFiles()) {
+                            file.delete();
+                        }
+                        for (File file : REMOVED.listFiles()) {
+                            file.delete();
+                        }
                     }
                 }
             }
