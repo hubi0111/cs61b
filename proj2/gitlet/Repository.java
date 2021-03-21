@@ -510,7 +510,7 @@ public class Repository {
         }
     }
 
-    private boolean specialEquals(String s1, String s2) {
+    private boolean nullEquals(String s1, String s2) {
         if (s1 != null) {
             return s1.equals(s2);
         } else {
@@ -537,11 +537,11 @@ public class Repository {
             String cur = curTracked.get(name);
             if (split == null && merge == null && cur == null) {
                 continue;
-            } else if (specialEquals(split, cur)
-                    && !specialEquals(split, merge)) {
+            } else if (nullEquals(split, cur)
+                    && !nullEquals(split, merge)) {
                 return true;
-            } else if (specialEquals(split, merge)
-                    || specialEquals(cur, merge)) {
+            } else if (nullEquals(split, merge)
+                    || nullEquals(cur, merge)) {
                 continue;
             } else {
                 return true;
@@ -564,6 +564,7 @@ public class Repository {
                                HashMap<String, String> mergeTracked,
                                HashMap<String, String> curTracked,
                                String mergeId) {
+        boolean isConflict = false;
         HashSet<String> files = new HashSet<>();
         files.addAll(splitTracked.keySet());
         files.addAll(mergeTracked.keySet());
@@ -572,20 +573,20 @@ public class Repository {
             String split = splitTracked.get(name);
             String merge = mergeTracked.get(name);
             String cur = curTracked.get(name);
-            if (specialEquals(split, cur)
-                    && !specialEquals(split, merge)
+            if (nullEquals(split, cur)
+                    && !nullEquals(split, merge)
                     && merge != null) {
                 checkoutFile(name, mergeId);
                 File file = new File(name);
                 File staged = new File(STAGED, name);
                 String s = readContentsAsString(file);
                 writeContents(staged, s);
-            } else if (specialEquals(split, cur)
+            } else if (nullEquals(split, cur)
                     && merge == null) {
                 String[] args = new String[]{"rm", name};
                 rm(args);
-            } else if (!specialEquals(split, merge)
-                    && !specialEquals(cur, merge)) {
+            } else if (!nullEquals(split, merge)
+                    && !nullEquals(cur, merge)) {
                 String curFile = "";
                 String mergeFile = "";
                 if (cur != null) {
@@ -605,11 +606,11 @@ public class Repository {
                 writeContents(file, text);
                 File staged2 = new File(STAGED, name);
                 writeContents(staged2, text);
-                return true;
+                isConflict = true;
             }
 
         }
-        return false;
+        return isConflict;
     }
 
     /**
