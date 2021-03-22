@@ -806,7 +806,7 @@ public class Repository {
         if (commit.getMergeParent() != null) {
             String parent = commit.getParent();
             String mergeParent = commit.getMergeParent();
-            System.out.println("Merge " + parent.substring(0, 7) + " " + mergeParent.substring(0, 7));
+            System.out.println("Merge: " + parent.substring(0, 7) + " " + mergeParent.substring(0, 7));
         }
         System.out.println("Date: " + commit.getTime());
         System.out.println(commit.getMessage());
