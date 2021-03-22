@@ -493,7 +493,7 @@ public class Repository {
                         }
                         Commit commit = new Commit(message, head.getId());
                         commit.setTrackedFiles(newTracked2);
-                        commit.setMergeParent(branch);
+                        commit.setMergeParent(mergeId);
                         saveCommit(commit);
                         String branch2 = readContentsAsString(HEAD);
                         File b = new File(BRANCHES, branch2);
@@ -806,7 +806,7 @@ public class Repository {
         if (commit.getMergeParent() != null) {
             String parent = commit.getParent();
             String mergeParent = commit.getMergeParent();
-            System.out.println("Merged " + mergeParent + " into " + parent);
+            System.out.println("Merge " + parent.substring(0, 7) + " " + mergeParent.substring(0, 7));
         }
         System.out.println("Date: " + commit.getTime());
         System.out.println(commit.getMessage());
