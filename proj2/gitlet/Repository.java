@@ -458,11 +458,12 @@ public class Repository {
                 String curId = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
                 if (splitId.equals(mergeId)) {
                     System.out.println("Given branch is an ancestor of the current branch.");
+                    System.exit(0);
                 } else if (splitId.equals(curId)) {
+                    checkoutBranch(mergeId);
                     File file = new File(BRANCHES, curBranch);
                     writeContents(file, mergeId);
-                    checkoutBranch(mergeId);
-                    System.out.println("Current branch fast-forwarded.");
+                    System.exit(0);
                 } else {
                     HashMap<String, String> curTracked = getCommit(curId).getTrackedFiles();
                     HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
