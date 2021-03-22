@@ -625,9 +625,9 @@ public class Repository {
         String curCommit = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
         String mergeParent = getCommit(mergeCommit).getParent();
         String curParent = getCommit(curCommit).getParent();
-        Set<String> merge = new HashSet<>();
-        Set<String> cur = new HashSet<>();
-        while (mergeParent != null && curParent != null) {
+        HashSet<String> merge = new HashSet<>();
+        HashSet<String> cur = new HashSet<>();
+        while (mergeParent != null || curParent != null) {
             if (cur.contains(mergeCommit) || mergeCommit.equals(curCommit)) {
                 return mergeCommit;
             } else if (merge.contains(curCommit)) {
