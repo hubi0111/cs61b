@@ -151,7 +151,7 @@ public class Repository {
             } else {
                 Commit head = getHEAD();
                 HashMap<String, String> curTracked = head.getTrackedFiles();
-                HashMap<String, String> newTracked = curTracked;
+                HashMap<String, String> newTracked = new HashMap<>();
                 for (String name : curTracked.keySet()) {
                     if (!staged.contains(name) && !removed.contains(name)) {
                         newTracked.put(name, curTracked.get(name));
