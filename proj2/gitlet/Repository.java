@@ -628,15 +628,21 @@ public class Repository {
         Set<String> merge = new HashSet<>();
         Set<String> cur = new HashSet<>();
         while (mergeParent != null && curParent != null) {
-            if (cur.contains(mergeCommit) || mergeParent.equals(curCommit)) {
+            if (cur.contains(mergeCommit) || mergeCommit.equals(curCommit)) {
                 return mergeCommit;
             } else if (merge.contains(curCommit)) {
                 return curCommit;
             } else {
                 merge.add(mergeCommit);
                 cur.add(curCommit);
-                mergeCommit = mergeParent;
-                curCommit = curParent;
+                if (mergeParent != null) {
+                    mergeCommit = mergeParent;
+                    mergeParent = getCommit(mergeParent).getParent();
+                }
+                if (curParent != null) {
+                    curCommit = curParent;
+                    curParent = getCommit(curParent).getParent();
+                }
             }
         }
         return null;
