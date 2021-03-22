@@ -463,6 +463,7 @@ public class Repository {
                     checkoutBranch(mergeId);
                     File file = new File(BRANCHES, curBranch);
                     writeContents(file, mergeId);
+                    System.out.println("Current branch fast-forwarded.");
                     System.exit(0);
                 } else {
                     HashMap<String, String> curTracked = getCommit(curId).getTrackedFiles();
