@@ -639,17 +639,42 @@ public class Repository {
             } else {
                 merge.add(mergeCommit);
                 cur.add(curCommit);
+                Commit p = getCommit(mergeParent);
+                Commit c = getCommit(curParent);
+                if (p.getMergeParent() != null) {
+                    merge.addAll(getMergeSet(getCommit(p.getMergeParent())));
+                }
+                if (c.getMergeParent() != null) {
+                    cur.addAll(getMergeSet(getCommit(c.getMergeParent())));
+                }
                 if (mergeParent != null) {
                     mergeCommit = mergeParent;
-                    mergeParent = getCommit(mergeParent).getParent();
+                    mergeParent = p.getParent();
                 }
                 if (curParent != null) {
                     curCommit = curParent;
-                    curParent = getCommit(curParent).getParent();
+                    curParent = c.getParent();
                 }
             }
         }
         return null;
+    }
+
+    private HashSet<String> getMergeSet(Commit c) {
+        HashSet<String> items = new HashSet<>();
+        String curCommit = c.getId();
+        String curParent = c.getParent();
+        while (curParent != null) {
+            items.add(curCommit);
+            if (c.getMergeParent() != null) {
+                items.addAll(getMergeSet(getCommit(c.getMergeParent())));
+            }
+            if (curParent != null) {
+                curCommit = curParent;
+                curParent = getCommit(curCommit).getParent();
+            }
+        }
+        return items;
     }
 
     /**
