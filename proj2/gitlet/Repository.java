@@ -639,21 +639,13 @@ public class Repository {
             } else {
                 merge.add(mergeCommit);
                 cur.add(curCommit);
-                Commit mergeC = getCommit(mergeParent);
-                Commit curC = getCommit(mergeParent);
                 if (mergeParent != null) {
                     mergeCommit = mergeParent;
-                    mergeParent = mergeC.getParent();
+                    mergeParent = getCommit(mergeParent).getParent();
                 }
                 if (curParent != null) {
                     curCommit = curParent;
-                    curParent = curC.getParent();
-                }
-                if (mergeC.getMergeParent() != null) {
-                    mergeParent = mergeC.getMergeParent();
-                }
-                if (curC.getMergeParent() != null) {
-                    curParent = curC.getMergeParent();
+                    curParent = getCommit(curParent).getParent();
                 }
             }
         }
