@@ -627,37 +627,78 @@ public class Repository {
         File mergeBranch = new File(BRANCHES, branch);
         String mergeCommit = readContentsAsString(mergeBranch);
         String curCommit = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
-        String mergeParent = getCommit(mergeCommit).getParent();
-        String curParent = getCommit(curCommit).getParent();
-        HashSet<String> merge = new HashSet<>();
-        HashSet<String> cur = new HashSet<>();
-        while (mergeParent != null || curParent != null) {
-            if (cur.contains(mergeCommit) || mergeCommit.equals(curCommit)) {
-                return mergeCommit;
-            } else if (merge.contains(curCommit)) {
-                return curCommit;
-            } else {
-                merge.add(mergeCommit);
-                cur.add(curCommit);
-                Commit p = getCommit(mergeCommit);
-                Commit c = getCommit(curCommit);
-                if (p.getMergeParent() != null) {
-                    merge.addAll(getMergeSet(getCommit(p.getMergeParent())));
-                }
-                if (c.getMergeParent() != null) {
-                    cur.addAll(getMergeSet(getCommit(c.getMergeParent())));
-                }
-                if (mergeParent != null) {
-                    mergeCommit = mergeParent;
-                    mergeParent = getCommit(mergeParent).getParent();
-                }
-                if (curParent != null) {
-                    curCommit = curParent;
-                    curParent = getCommit(curParent).getParent();
+//        String mergeParent = getCommit(mergeCommit).getParent();
+//        String curParent = getCommit(curCommit).getParent();
+//        HashSet<String> merge = new HashSet<>();
+//        HashSet<String> cur = new HashSet<>();
+//        while (mergeParent != null || curParent != null) {
+//            if (cur.contains(mergeCommit) || mergeCommit.equals(curCommit)) {
+//                return mergeCommit;
+//            } else if (merge.contains(curCommit)) {
+//                return curCommit;
+//            } else {
+//                merge.add(mergeCommit);
+//                cur.add(curCommit);
+//                Commit p = getCommit(mergeCommit);
+//                Commit c = getCommit(curCommit);
+//                if (p.getMergeParent() != null) {
+//                    merge.addAll(getMergeSet(getCommit(p.getMergeParent())));
+//                }
+//                if (c.getMergeParent() != null) {
+//                    cur.addAll(getMergeSet(getCommit(c.getMergeParent())));
+//                }
+//                if (mergeParent != null) {
+//                    mergeCommit = mergeParent;
+//                    mergeParent = getCommit(mergeParent).getParent();
+//                }
+//                if (curParent != null) {
+//                    curCommit = curParent;
+//                    curParent = getCommit(curParent).getParent();
+//                }
+//            }
+//        }
+        HashSet<String> seen = traverseMerge(mergeCommit);
+        return traverseCur(curCommit, seen);
+    }
+
+    private String traverseCur(String id, HashSet<String> set) {
+        Commit c = getCommit(id);
+        String commitId = c.getId();
+        String commitParent = c.getParent();
+        String commitMergeParent = c.getMergeParent();
+        while (commitParent != null) {
+            if (set.contains(commitId)) {
+                return commitId;
+            }
+            set.add(commitId);
+            if (commitMergeParent != null) {
+                String mergeResult = traverseCur(commitMergeParent, set);
+                if (mergeResult != null) {
+                    return mergeResult;
                 }
             }
+            c = getCommit(c.getParent());
+            commitId = c.getId();
+            commitParent = c.getParent();
         }
         return null;
+    }
+
+    private HashSet<String> traverseMerge(String id) {
+        HashSet<String> set = new HashSet<>();
+        Commit c = getCommit(id);
+        String commitId = c.getId();
+        String commitParent = c.getParent();
+        while (commitParent != null) {
+            set.add(commitId);
+            if (c.getMergeParent() != null) {
+                set.addAll(traverseMerge(c.getMergeParent()));
+            }
+            c = getCommit(c.getParent());
+            commitId = c.getId();
+            commitParent = c.getParent();
+        }
+        return set;
     }
 
     private HashSet<String> getMergeSet(Commit c) {
