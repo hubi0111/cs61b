@@ -639,8 +639,8 @@ public class Repository {
             } else {
                 merge.add(mergeCommit);
                 cur.add(curCommit);
-                Commit p = getCommit(mergeParent);
-                Commit c = getCommit(curParent);
+                Commit p = getCommit(mergeCommit);
+                Commit c = getCommit(curCommit);
                 if (p.getMergeParent() != null) {
                     merge.addAll(getMergeSet(getCommit(p.getMergeParent())));
                 }
@@ -649,11 +649,11 @@ public class Repository {
                 }
                 if (mergeParent != null) {
                     mergeCommit = mergeParent;
-                    mergeParent = p.getParent();
+                    mergeParent = getCommit(mergeParent).getParent();
                 }
                 if (curParent != null) {
                     curCommit = curParent;
-                    curParent = c.getParent();
+                    curParent = getCommit(curParent).getParent();
                 }
             }
         }
