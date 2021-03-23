@@ -307,9 +307,9 @@ public class Repository {
             }
             System.out.println();
             System.out.println("=== Modifications Not Staged For Commit ===");
-//            for (String m : modifications) {
-//                System.out.println(m);
-//            }
+            for (String m : modifications) {
+                System.out.println(m);
+            }
             System.out.println();
             System.out.println("=== Untracked Files ===");
             for (String u : untracked) {
