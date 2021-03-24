@@ -481,7 +481,7 @@ public class Repository {
                     } else {
                         Commit head = getHEAD();
                         HashMap<String, String> curTracked2 = head.getTrackedFiles();
-                        HashMap<String, String> newTracked2 = curTracked2;
+                        HashMap<String, String> newTracked2 = new HashMap<>();
                         for (String name : curTracked2.keySet()) {
                             if (!stagedFiles.contains(name) && !removedFiles.contains(name)) {
                                 newTracked2.put(name, curTracked2.get(name));
@@ -498,6 +498,7 @@ public class Repository {
                         commit.setTrackedFiles(newTracked2);
                         commit.setMergeParent(mergeId);
                         commit.setMergeParentName(branch);
+                        System.out.println(newTracked2);
                         saveCommit(commit);
                         String branch2 = readContentsAsString(HEAD);
                         File b = new File(BRANCHES, branch2);
