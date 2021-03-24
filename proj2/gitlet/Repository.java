@@ -498,7 +498,6 @@ public class Repository {
                         commit.setTrackedFiles(newTracked2);
                         commit.setMergeParent(mergeId);
                         commit.setMergeParentName(branch);
-                        System.out.println(newTracked2);
                         saveCommit(commit);
                         String branch2 = readContentsAsString(HEAD);
                         File b = new File(BRANCHES, branch2);
