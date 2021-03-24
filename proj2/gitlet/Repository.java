@@ -627,36 +627,6 @@ public class Repository {
         File mergeBranch = new File(BRANCHES, branch);
         String mergeCommit = readContentsAsString(mergeBranch);
         String curCommit = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
-//        String mergeParent = getCommit(mergeCommit).getParent();
-//        String curParent = getCommit(curCommit).getParent();
-//        HashSet<String> merge = new HashSet<>();
-//        HashSet<String> cur = new HashSet<>();
-//        while (mergeParent != null || curParent != null) {
-//            if (cur.contains(mergeCommit) || mergeCommit.equals(curCommit)) {
-//                return mergeCommit;
-//            } else if (merge.contains(curCommit)) {
-//                return curCommit;
-//            } else {
-//                merge.add(mergeCommit);
-//                cur.add(curCommit);
-//                Commit p = getCommit(mergeCommit);
-//                Commit c = getCommit(curCommit);
-//                if (p.getMergeParent() != null) {
-//                    merge.addAll(getMergeSet(getCommit(p.getMergeParent())));
-//                }
-//                if (c.getMergeParent() != null) {
-//                    cur.addAll(getMergeSet(getCommit(c.getMergeParent())));
-//                }
-//                if (mergeParent != null) {
-//                    mergeCommit = mergeParent;
-//                    mergeParent = getCommit(mergeParent).getParent();
-//                }
-//                if (curParent != null) {
-//                    curCommit = curParent;
-//                    curParent = getCommit(curParent).getParent();
-//                }
-//            }
-//        }
         HashSet<String> seen = traverseMerge(mergeCommit);
         return traverseCur(curCommit, seen);
     }
@@ -701,23 +671,6 @@ public class Repository {
         return set;
     }
 
-    private HashSet<String> getMergeSet(Commit c) {
-        HashSet<String> items = new HashSet<>();
-        String curCommit = c.getId();
-        String curParent = c.getParent();
-        while (curParent != null) {
-            items.add(curCommit);
-            if (c.getMergeParent() != null) {
-                items.addAll(getMergeSet(getCommit(c.getMergeParent())));
-            }
-            if (curParent != null) {
-                curCommit = curParent;
-                curParent = getCommit(curCommit).getParent();
-            }
-        }
-        return items;
-    }
-
     /**
      * returns a HashSet of all files in the working directory that are untracked
      *
@@ -725,7 +678,7 @@ public class Repository {
      */
     private HashSet<String> getUntrackedFiles() {
         HashSet<String> untracked = new HashSet<>();
-        List<String> allFiles = plainFilenamesIn(new File("."));
+        List<String> allFiles = plainFilenamesIn(CWD);
         for (String name : allFiles) {
             boolean tracked = getHEAD().getTrackedFiles().keySet().contains(name);
             File staged = new File(STAGED, name);
@@ -744,7 +697,7 @@ public class Repository {
      */
     private HashSet<String> getModifiedFiles() {
         HashSet<String> modified = new HashSet<>();
-        List<String> allFiles = plainFilenamesIn(new File("."));
+        List<String> allFiles = plainFilenamesIn(CWD);
         for (String name : allFiles) {
             boolean tracked = getHEAD().getTrackedFiles().keySet().contains(name);
             File file = new File(name);
@@ -823,7 +776,7 @@ public class Repository {
         Set<String> tracked = commit.getTrackedFiles().keySet();
         Commit commit2 = getCommit(id);
         Set<String> tracked2 = commit2.getTrackedFiles().keySet();
-        for (String name : new File(".").list()) {
+        for (String name : CWD.list()) {
             if ((!tracked.contains(name) && tracked2.contains(name)) || (tracked.contains(name)
                     && !tracked2.contains(name) && new File(REMOVED, name).exists())) {
                 System.out.println("There is an untracked file in the way"
