@@ -1,3 +1,0 @@
-<<<<<<< HEAD
-Hello, 61b!=======
-Hello, everyone!>>>>>>>

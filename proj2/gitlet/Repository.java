@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 import static gitlet.Utils.*;
@@ -628,30 +629,30 @@ public class Repository {
         String mergeCommit = readContentsAsString(mergeBranch);
         String curCommit = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
         HashSet<String> seen = traverseMerge(mergeCommit);
-        return traverseCur(curCommit, seen);
+        PriorityQueue<String> pq = new PriorityQueue<>();
+        pq.add(curCommit);
+        return traverseCur(pq, seen);
     }
 
-    private String traverseCur(String id, HashSet<String> set) {
-        Commit c = getCommit(id);
-        String commitId = c.getId();
+    private String traverseCur(PriorityQueue<String> pq, HashSet<String> set) {
+        if (pq.isEmpty()) {
+            return null;
+        }
+        String commitId = pq.poll();
+        if (set.contains(commitId)) {
+            return commitId;
+        }
+        Commit c = getCommit(commitId);
         String commitParent = c.getParent();
         String commitMergeParent = c.getMergeParent();
-        while (commitParent != null) {
-            if (set.contains(commitId)) {
-                return commitId;
-            }
-            set.add(commitId);
-            if (commitMergeParent != null) {
-                String mergeResult = traverseCur(commitMergeParent, set);
-                if (mergeResult != null) {
-                    return mergeResult;
-                }
-            }
-            c = getCommit(c.getParent());
-            commitId = c.getId();
-            commitParent = c.getParent();
+        set.add(commitId);
+        if (commitParent != null) {
+            pq.add(commitParent);
         }
-        return null;
+        if (commitMergeParent != null) {
+            pq.add(commitMergeParent);
+        }
+        return traverseCur(pq, set);
     }
 
     private HashSet<String> traverseMerge(String id) {
