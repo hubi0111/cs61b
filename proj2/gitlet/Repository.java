@@ -628,7 +628,7 @@ public class Repository {
         File mergeBranch = new File(BRANCHES, branch);
         String mergeCommit = readContentsAsString(mergeBranch);
         String curCommit = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
-        HashSet<String> seen = traverseMerge(mergeCommit);
+        HashSet<String> seen = traverseMerge(mergeCommit, new HashSet<>());
         PriorityQueue<String> pq = new PriorityQueue<>();
         pq.add(curCommit);
         return traverseCur(pq, seen);
@@ -655,22 +655,20 @@ public class Repository {
         return traverseCur(pq, set);
     }
 
-    private HashSet<String> traverseMerge(String id) {
-        HashSet<String> set = new HashSet<>();
+    private HashSet<String> traverseMerge(String id, HashSet<String> set) {
         Commit c = getCommit(id);
         String commitId = c.getId();
         String commitParent = c.getParent();
-        while (commitParent != null) {
-            set.add(commitId);
-            if (c.getMergeParent() != null) {
-                set.addAll(traverseMerge(c.getMergeParent()));
-            }
-            c = getCommit(c.getParent());
-            commitId = c.getId();
-            commitParent = c.getParent();
-            if(c.getMessage().equals("initial commit")){
-                set.add(commitId);
-            }
+        String mergeParent = c.getMergeParent();
+        if(set.contains(commitId)){
+            return set;
+        }
+        set.add(commitId);
+        if (commitParent != null) {
+            set.addAll(traverseMerge(commitParent, set));
+        }
+        if (mergeParent != null) {
+            set.addAll(traverseMerge(mergeParent, set));
         }
         return set;
     }
