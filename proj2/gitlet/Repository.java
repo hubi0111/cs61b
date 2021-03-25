@@ -668,6 +668,9 @@ public class Repository {
             c = getCommit(c.getParent());
             commitId = c.getId();
             commitParent = c.getParent();
+            if(c.getMessage().equals("initial commit")){
+                set.add(commitId);
+            }
         }
         return set;
     }
