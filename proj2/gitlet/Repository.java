@@ -467,6 +467,12 @@ public class Repository {
                     System.out.println("Current branch fast-forwarded.");
                     System.exit(0);
                 } else {
+                    HashMap<String, String> curTracked = getCommit(curId).getTrackedFiles();
+                    HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
+                    HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
+                    if (isConflict(splitTracked, mergeTracked, curTracked, mergeId)) {
+                        System.out.println("Encountered a merge conflict.");
+                    }
                     HashSet<String> stagedFiles = new HashSet<>(Arrays.asList(STAGED.list()));
                     HashSet<String> removedFiles = new HashSet<>(Arrays.asList(REMOVED.list()));
                     String message = "Merged " + branch + " into " + curBranch + ".";
@@ -502,12 +508,6 @@ public class Repository {
                         for (File file : REMOVED.listFiles()) {
                             file.delete();
                         }
-                    }
-                    HashMap<String, String> curTracked = getCommit(curId).getTrackedFiles();
-                    HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
-                    HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
-                    if (isConflict(splitTracked, mergeTracked, curTracked, mergeId)) {
-                        System.out.println("Encountered a merge conflict.");
                     }
                 }
             }
