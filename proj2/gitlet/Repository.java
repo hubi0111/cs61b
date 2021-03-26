@@ -467,12 +467,6 @@ public class Repository {
                     System.out.println("Current branch fast-forwarded.");
                     System.exit(0);
                 } else {
-                    HashMap<String, String> curTracked = getCommit(curId).getTrackedFiles();
-                    HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
-                    HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
-                    if (isConflict(splitTracked, mergeTracked, curTracked, mergeId)) {
-                        System.out.println("Encountered a merge conflict.");
-                    }
                     HashSet<String> stagedFiles = new HashSet<>(Arrays.asList(STAGED.list()));
                     HashSet<String> removedFiles = new HashSet<>(Arrays.asList(REMOVED.list()));
                     String message = "Merged " + branch + " into " + curBranch + ".";
@@ -498,7 +492,6 @@ public class Repository {
                         Commit commit = new Commit(message, head.getId());
                         commit.setTrackedFiles(newTracked2);
                         commit.setMergeParent(mergeId);
-                        commit.setMergeParentName(branch);
                         saveCommit(commit);
                         String branch2 = readContentsAsString(HEAD);
                         File b = new File(BRANCHES, branch2);
@@ -509,6 +502,12 @@ public class Repository {
                         for (File file : REMOVED.listFiles()) {
                             file.delete();
                         }
+                    }
+                    HashMap<String, String> curTracked = getCommit(curId).getTrackedFiles();
+                    HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
+                    HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
+                    if (isConflict(splitTracked, mergeTracked, curTracked, mergeId)) {
+                        System.out.println("Encountered a merge conflict.");
                     }
                 }
             }
@@ -681,44 +680,6 @@ public class Repository {
             }
         }
         return traverse(mergepq, curpq, mergeSeen, curSeen);
-    }
-
-    private String traverseCur(PriorityQueue<String> pq, HashSet<String> set) {
-        if (pq.isEmpty()) {
-            return null;
-        }
-        String commitId = pq.poll();
-        if (set.contains(commitId)) {
-            return commitId;
-        }
-        Commit c = getCommit(commitId);
-        String commitParent = c.getParent();
-        String commitMergeParent = c.getMergeParent();
-        set.add(commitId);
-        if (commitParent != null) {
-            pq.add(commitParent);
-        }
-        if (commitMergeParent != null) {
-            pq.add(commitMergeParent);
-        }
-        return traverseCur(pq, set);
-    }
-
-    private HashSet<String> traverseMerge(String commitId, HashSet<String> set) {
-        Commit c = getCommit(commitId);
-        String commitParent = c.getParent();
-        String mergeParent = c.getMergeParent();
-        if (set.contains(commitId)) {
-            return set;
-        }
-        set.add(commitId);
-        if (commitParent != null) {
-            set.addAll(traverseMerge(commitParent, set));
-        }
-        if (mergeParent != null) {
-            set.addAll(traverseMerge(mergeParent, set));
-        }
-        return set;
     }
 
     /**

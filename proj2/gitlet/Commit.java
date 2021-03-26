@@ -38,11 +38,6 @@ public class Commit implements Serializable {
     private String mergeParent;
 
     /**
-     * The merge parent name of this Commit.
-     */
-    private String mergeParentName;
-
-    /**
      * The files this Commit tracks.
      */
     private HashMap<String, String> trackedFiles;
@@ -116,11 +111,4 @@ public class Commit implements Serializable {
         this.id = id;
     }
 
-    public String getMergeParentName() {
-        return mergeParentName;
-    }
-
-    public void setMergeParentName(String mergeParentName) {
-        this.mergeParentName = mergeParentName;
-    }
 }
