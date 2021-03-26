@@ -635,7 +635,8 @@ public class Repository {
         return traverse(mergepq, curpq, new HashSet<String>(), new HashSet<String>());
     }
 
-    private String traverse(PriorityQueue<String> mergepq, PriorityQueue<String> curpq, HashSet<String> mergeSeen, HashSet<String> curSeen) {
+    private String traverse(PriorityQueue<String> mergepq, PriorityQueue<String> curpq,
+                            HashSet<String> mergeSeen, HashSet<String> curSeen) {
         if (mergepq.isEmpty() && curpq.isEmpty()) {
             return null;
         }
