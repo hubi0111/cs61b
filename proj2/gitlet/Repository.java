@@ -628,10 +628,58 @@ public class Repository {
         File mergeBranch = new File(BRANCHES, branch);
         String mergeCommit = readContentsAsString(mergeBranch);
         String curCommit = readContentsAsString(new File(BRANCHES, readContentsAsString(HEAD)));
-        HashSet<String> seen = traverseMerge(mergeCommit, new HashSet<>());
-        PriorityQueue<String> pq = new PriorityQueue<>();
-        pq.add(curCommit);
-        return traverseCur(pq, seen);
+        PriorityQueue<String> mergepq = new PriorityQueue<>();
+        mergepq.add(mergeCommit);
+        PriorityQueue<String> curpq = new PriorityQueue<>();
+        curpq.add(curCommit);
+        return traverse(mergepq, curpq, new HashSet<String>(), new HashSet<String>());
+    }
+
+    private String traverse(PriorityQueue<String> mergepq, PriorityQueue<String> curpq, HashSet<String> mergeSeen, HashSet<String> curSeen) {
+        if (mergepq.isEmpty() && curpq.isEmpty()) {
+            return null;
+        }
+        Commit curCommit = null;
+        Commit mergeCommit = null;
+        String curId = null;
+        String mergeId = null;
+        if (!mergepq.isEmpty()) {
+            mergeId = mergepq.poll();
+            mergeCommit = getCommit(mergeId);
+        }
+        if (!curpq.isEmpty()) {
+            curId = curpq.poll();
+            curCommit = getCommit(curId);
+        }
+        if (mergeCommit != null) {
+            if (curSeen.contains(mergeId)) {
+                return mergeId;
+            }
+            mergeSeen.add(mergeId);
+            String mergeParent = mergeCommit.getParent();
+            String mergemergeParent = mergeCommit.getMergeParent();
+            if (mergeParent != null) {
+                mergepq.add(mergeParent);
+            }
+            if (mergemergeParent != null) {
+                mergepq.add(mergemergeParent);
+            }
+        }
+        if (curCommit != null) {
+            if (mergeSeen.contains(curId)) {
+                return curId;
+            }
+            curSeen.add(curId);
+            String curParent = curCommit.getParent();
+            String curmergeParent = curCommit.getMergeParent();
+            if (curParent != null) {
+                curpq.add(curParent);
+            }
+            if (curmergeParent != null) {
+                curpq.add(curmergeParent);
+            }
+        }
+        return traverse(mergepq, curpq, mergeSeen, curSeen);
     }
 
     private String traverseCur(PriorityQueue<String> pq, HashSet<String> set) {
@@ -655,12 +703,11 @@ public class Repository {
         return traverseCur(pq, set);
     }
 
-    private HashSet<String> traverseMerge(String id, HashSet<String> set) {
-        Commit c = getCommit(id);
-        String commitId = c.getId();
+    private HashSet<String> traverseMerge(String commitId, HashSet<String> set) {
+        Commit c = getCommit(commitId);
         String commitParent = c.getParent();
         String mergeParent = c.getMergeParent();
-        if(set.contains(commitId)){
+        if (set.contains(commitId)) {
             return set;
         }
         set.add(commitId);
