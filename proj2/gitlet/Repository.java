@@ -534,6 +534,8 @@ public class Repository {
         HashMap<String, String> curTracked = getHEAD().getTrackedFiles();
         HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
         String splitId = splitPoint(branch);
+//        Commit ccc = getCommit(splitId);
+//        System.out.println("/////////////////////////"+ccc.getMessage());
         HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
         for (String name : getUntrackedFiles()) {
             String split = splitTracked.get(name);
@@ -660,9 +662,11 @@ public class Repository {
             String mergemergeParent = mergeCommit.getMergeParent();
             if (mergeParent != null) {
                 mergepq.add(mergeParent);
+                //System.out.println("mp" + getCommit(mergeParent).getMessage());
             }
             if (mergemergeParent != null) {
                 mergepq.add(mergemergeParent);
+                //System.out.println("mmp" + getCommit(mergemergeParent).getMessage());
             }
         }
         if (curCommit != null) {
@@ -674,10 +678,15 @@ public class Repository {
             String curmergeParent = curCommit.getMergeParent();
             if (curParent != null) {
                 curpq.add(curParent);
+                //System.out.println("cp" + getCommit(curParent).getMessage());
             }
             if (curmergeParent != null) {
                 curpq.add(curmergeParent);
+                //System.out.println("cmp" + getCommit(curmergeParent).getMessage());
             }
+        }
+        if (mergeId.equals(curId)) {
+            return mergeId;
         }
         return traverse(mergepq, curpq, mergeSeen, curSeen);
     }
