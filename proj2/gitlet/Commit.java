@@ -47,10 +47,11 @@ public class Commit implements Serializable {
      */
     private String id;
 
-    Commit(String message, String parent) {
+    Commit(String message, String parent, HashMap<String, String>tracked, String mergeParent) {
         this.message = message;
         this.parent = parent;
-        this.trackedFiles = new HashMap<>();
+        this.trackedFiles = tracked;
+        this.mergeParent = mergeParent;
         setTime();
     }
 

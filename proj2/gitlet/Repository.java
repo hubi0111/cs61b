@@ -81,7 +81,7 @@ public class Repository {
             COMMITS.mkdir();
             REMOVED.mkdir();
             STAGED.mkdir();
-            Commit intialCommit = new Commit("initial commit", null);
+            Commit intialCommit = new Commit("initial commit", null, new HashMap<>(), null);
             intialCommit.setTime("Thu Jan 1 00:00:00 1970 -0800");
             saveCommit(intialCommit);
             File master = new File(BRANCHES, "master");
@@ -165,8 +165,7 @@ public class Repository {
                     File blob = new File(BLOBS, id);
                     writeContents(blob, readContentsAsString(file));
                 }
-                Commit commit = new Commit(message, head.getId());
-                commit.setTrackedFiles(newTracked);
+                Commit commit = new Commit(message, head.getId(), newTracked, null);
                 saveCommit(commit);
                 String branch = readContentsAsString(HEAD);
                 File b = new File(BRANCHES, branch);
@@ -495,9 +494,7 @@ public class Repository {
                             File blob = new File(BLOBS, id);
                             writeContents(blob, readContentsAsString(file));
                         }
-                        Commit commit = new Commit(message, head.getId());
-                        commit.setTrackedFiles(newTracked2);
-                        commit.setMergeParent(mergeId);
+                        Commit commit = new Commit(message, head.getId(), newTracked2, mergeId);
                         saveCommit(commit);
                         String branch2 = readContentsAsString(HEAD);
                         File b = new File(BRANCHES, branch2);
@@ -535,7 +532,7 @@ public class Repository {
         HashMap<String, String> mergeTracked = getCommit(mergeId).getTrackedFiles();
         String splitId = splitPoint(branch);
 //        Commit ccc = getCommit(splitId);
-//        System.out.println("/////////////////////////"+ccc.getMessage());
+//        System.out.println("/////////////////////////" + ccc.getMessage());
         HashMap<String, String> splitTracked = getCommit(splitId).getTrackedFiles();
         for (String name : getUntrackedFiles()) {
             String split = splitTracked.get(name);
@@ -684,9 +681,6 @@ public class Repository {
                 curpq.add(curmergeParent);
                 //System.out.println("cmp" + getCommit(curmergeParent).getMessage());
             }
-        }
-        if (mergeId.equals(curId)) {
-            return mergeId;
         }
         return traverse(mergepq, curpq, mergeSeen, curSeen);
     }
