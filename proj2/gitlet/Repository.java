@@ -61,6 +61,8 @@ public class Repository {
      */
     public static final File HEAD = join(GITLET_DIR, "HEAD");
 
+    public static final File REMOTE = join(GITLET_DIR, "remote");
+
     /**
      * sets up persistance and creates inital commit
      *
@@ -81,6 +83,7 @@ public class Repository {
             COMMITS.mkdir();
             REMOVED.mkdir();
             STAGED.mkdir();
+            REMOTE.mkdir();
             Commit intialCommit = new Commit("initial commit", null, new HashMap<>(), null);
             intialCommit.setTime("Thu Jan 1 00:00:00 1970 -0800");
             saveCommit(intialCommit);
@@ -908,4 +911,55 @@ public class Repository {
         }
         return null;
     }
+
+    public void addRemote(String[] args) {
+        if (args.length != 3) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+            String name = args[1];
+            String dest = args[2];
+            File file = new File(REMOTE, name);
+            if (file.exists()) {
+                System.out.println("A remote with that name already exists.");
+                System.exit(0);
+            }
+            writeContents(file, dest);
+        }
+    }
+
+    public void rmRemote(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+            String name = args[1];
+            File file = new File(REMOTE, name);
+            if (!file.exists()) {
+                System.out.println("A remote with that name does not exist.");
+                System.exit(0);
+            }
+            file.delete();
+        }
+    }
+
+    public void push(String[] args) {
+        if (args.length != 3) {
+            System.out.println("Incorrect operands.");
+            System.exit(0);
+        } else {
+            String name = args[1];
+            String branch = args[2];
+            File remoteDIR = new File(REMOTE, name);
+            if(!remoteDIR.exists()){
+                System.out.println("Remote directory not found.");
+                System.exit(0);
+            }
+            String dest = readContentsAsString(remoteDIR);
+            File remoteHEAD = new File(dest, "HEAD");
+            String remoteHEADContents = readContentsAsString(remoteHEAD);
+
+        }
+    }
+
 }
