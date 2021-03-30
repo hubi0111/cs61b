@@ -951,7 +951,7 @@ public class Repository {
             String name = args[1];
             String branch = args[2];
             File remoteDIR = new File(REMOTE, name);
-            if(!remoteDIR.exists()){
+            if (!remoteDIR.exists()) {
                 System.out.println("Remote directory not found.");
                 System.exit(0);
             }
